@@ -77,3 +77,7 @@ Once you have installed and configured the project, follow these steps to run an
 - **[Kotlin](https://kotlinlang.org/)** - Programming language for building Android apps.
 - **[Ring of Rings SDK](https://github.com/ringofrings/ringofringssdk)** - SDK for integrating ring-based identity and access management in Android applications.
 - **[Trustless Work API](https://docs.trustlesswork.com/trustless-work)** - Enables trustless payments via smart contracts, securing funds in escrow until milestones are approved by clients.
+
+
+## 👨🏼‍🌾👩🏼‍🌾Working together 
+This repository is part of the project called Revo-Farmers, this repository works together with the other repositories of the project such as Revo-Frontend and Revo-Backend. 
