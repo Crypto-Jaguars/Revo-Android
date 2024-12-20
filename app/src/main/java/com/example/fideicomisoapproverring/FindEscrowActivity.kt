@@ -1,7 +1,9 @@
 package com.example.fideicomisoapproverring
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -25,10 +27,30 @@ class FindEscrowActivity : AppCompatActivity() {
     private lateinit var contractIdInput: EditText
     private lateinit var enterButton: Button
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var logoutButton: Button
 
+    @SuppressLint("MissingInflatedId")
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_find_escrow)
+
+        logoutButton = findViewById(R.id.logoutButton)
+        logoutButton.setOnClickListener {
+            // Remove the connection status
+            val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
+            sharedPreferences.edit()
+                .remove("isWalletConnected")
+                .remove("publicKey")
+                .apply()
+
+            Toast.makeText(this, "Wallet desconectada.", Toast.LENGTH_SHORT).show()
+
+            // Redirect to EscrowApproverActivity
+            val intent = Intent(this, EscrowApproverActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
 
         loadingPanel = findViewById(R.id.loadingPanel)
         form = findViewById(R.id.form)

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/black"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Título del Bottom Sheet -->
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select a Wallet"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:paddingBottom="8dp" />
+
+    <!-- Lista de wallets -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/walletList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

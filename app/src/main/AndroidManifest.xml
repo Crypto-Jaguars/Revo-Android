@@ -17,11 +17,10 @@
             android:name=".EngagementActivity"
             android:exported="false" />
         <activity
-            android:name=".FindEscrowActivity"
+            android:name=".EscrowApproverActivity"
             android:exported="true"
-            android:label="@string/titleText"
-            android:theme="@style/Theme.FideicomisoApproverRing">
-
+            android:theme="@style/Theme.FideicomisoApproverRing"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -41,13 +40,30 @@
 
         </activity>
         <activity
-            android:name=".EscrowApproverActivity"
-            android:exported="true"
-            android:theme="@style/Theme.AppCompat.Light"
-            >
+            android:name=".FindEscrowActivity"
+            android:exported="false"
+            android:label="@string/titleText"
+            android:theme="@style/Theme.FideicomisoApproverRing">
+
+
 
 
         </activity>
+        <activity android:name=".CallbackActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="stellarapp" android:host="callback" />
+            </intent-filter>
+        </activity>
+
+
+
+
+
     </application>
 
 </manifest>

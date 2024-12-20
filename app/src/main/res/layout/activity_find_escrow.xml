@@ -91,6 +91,19 @@
             android:textAllCaps="false"
             android:textColor="@color/white"
             app:cornerRadius="50sp" />
+        <com.google.android.material.button.MaterialButton
+            style="@style/MyButton"
+            android:id="@+id/logoutButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:text="Disconnect wallet"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            app:cornerRadius="50sp" />
+
+
+
 
     </LinearLayout>
 
