@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- Fondo decorativo -->
+    <!-- Decorative background -->
     <View
         android:layout_width="200dp"
         android:layout_height="200dp"

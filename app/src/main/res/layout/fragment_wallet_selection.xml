@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Título del Bottom Sheet -->
+    <!-- Bottom Sheet Title -->
     <TextView
         android:id="@+id/titleText"
         android:layout_width="wrap_content"
@@ -17,7 +17,7 @@
         android:textColor="@android:color/white"
         android:paddingBottom="8dp" />
 
-    <!-- Lista de wallets -->
+    <!-- Wallet list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/walletList"
         android:layout_width="match_parent"
