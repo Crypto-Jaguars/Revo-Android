@@ -7,7 +7,7 @@
     android:padding="16dp"
     android:background="@color/black">
 
-    <!-- Nombre de la wallet -->
+    <!-- Wallet name -->
     <TextView
         android:id="@+id/walletName"
         android:layout_width="0dp"
@@ -16,7 +16,7 @@
         android:textColor="@android:color/white"
         android:textSize="16sp" />
 
-    <!-- Estado de la wallet -->
+    <!-- Wallet status -->
     <TextView
         android:id="@+id/walletStatus"
         android:layout_width="wrap_content"

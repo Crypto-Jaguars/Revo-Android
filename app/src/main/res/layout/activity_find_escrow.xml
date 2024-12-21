@@ -101,6 +101,27 @@
             android:textAllCaps="false"
             android:textColor="@color/white"
             app:cornerRadius="50sp" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/checkBalanceButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Check Balance"
+            android:layout_marginBottom="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/signTransactionButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sign Transaction"
+            android:layout_marginBottom="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/verifyAccountButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Verify Account"
+            android:layout_marginBottom="16dp" />
+
 
 
 

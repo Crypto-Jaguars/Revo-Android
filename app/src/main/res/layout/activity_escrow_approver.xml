@@ -41,6 +41,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.4" />
 
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/connectButton"
         android:layout_width="180dp"
@@ -59,4 +60,5 @@
         app:layout_constraintTop_toBottomOf="@id/titleText"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
