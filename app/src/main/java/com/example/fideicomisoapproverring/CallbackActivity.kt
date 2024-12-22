@@ -6,36 +6,32 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
-
 class CallbackActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val data: Uri? = intent?.data
-        if (data != null) {
-            val publicKey = data.getQueryParameter("pubkey") // Receives the public key
-            if (publicKey != null) {
-                // Save connection status
-                val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
-                sharedPreferences.edit()
-                    .putBoolean("isWalletConnected", true)
-                    .putString("publicKey", publicKey)
-                    .apply()
+        val publicKey = data?.getQueryParameter("pubkey") // Obtains the public key
 
-                // Redirect the user
-                val intent = Intent(this, FindEscrowActivity::class.java)
-                intent.putExtra("publicKey", publicKey)
-                startActivity(intent)
-            } else {
-                Toast.makeText(this, "Error: Public key not received.", Toast.LENGTH_SHORT)
-                    .show()
-            }
+        if (publicKey != null) {
+            // Save public key in SharedPreferences
+            val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
+            sharedPreferences.edit()
+                .putBoolean("isWalletConnected", true)
+                .putString("publicKey", publicKey)
+                .apply()
+
+            Toast.makeText(this, "Public key received: $publicKey", Toast.LENGTH_SHORT).show()
+
+            // Redirect to FindEscrow
+            val intent = Intent(this, FindEscrowActivity::class.java)
+            intent.putExtra("publicKey", publicKey)
+            startActivity(intent)
+            finish()
         } else {
-            Toast.makeText(this, "Error: No data received.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Error: Public key not received.", Toast.LENGTH_SHORT).show()
+            finish()
         }
-
-        finish()
     }
 }
-

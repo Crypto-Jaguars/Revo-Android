@@ -8,8 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class WalletAdapter(
-    private val walletOptions: List<WalletSelectionBottomSheet.WalletOption>,
-    private val onWalletSelected: (WalletSelectionBottomSheet.WalletOption) -> Unit
+    private val walletOptions: List<WalletSelection.WalletOption>,
+    private val onWalletSelected: (WalletSelection.WalletOption) -> Unit
 ) : RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
 
     class WalletViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
