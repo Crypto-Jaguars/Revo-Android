@@ -17,18 +17,17 @@
             android:name=".EngagementActivity"
             android:exported="false" />
         <activity
-            android:name=".FindEscrowActivity"
+            android:name=".EscrowApproverActivity"
             android:exported="true"
-            android:label="@string/titleText"
             android:theme="@style/Theme.FideicomisoApproverRing">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
         </activity>
+
         <activity
             android:name=".EscrowDetailsActivity"
             android:exported="false"
@@ -41,12 +40,10 @@
 
         </activity>
         <activity
-            android:name=".EscrowApproverActivity"
-            android:exported="true"
-            android:theme="@style/Theme.AppCompat.Light"
-            >
-
-
+            android:name=".FindEscrowActivity"
+            android:exported="false"
+            android:label="@string/titleText"
+            android:theme="@style/Theme.FideicomisoApproverRing">
         </activity>
     </application>
 

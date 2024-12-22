@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- Background gradient overlay -->
+    <!-- Decorative background -->
     <View
         android:layout_width="200dp"
         android:layout_height="200dp"
@@ -14,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="-50dp"
-        android:layout_marginEnd="-50dp"/>
+        android:layout_marginEnd="-50dp" />
 
     <View
         android:layout_width="150dp"
@@ -24,7 +24,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="-30dp"
-        android:layout_marginStart="-30dp"/>
+        android:layout_marginStart="-30dp" />
 
     <TextView
         android:id="@+id/titleText"
@@ -57,6 +57,49 @@
         android:insetBottom="0dp"
         android:layout_marginTop="24dp"
         app:layout_constraintTop_toBottomOf="@id/titleText"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <!-- Input field for public key -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/publicKeyInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/connectButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/publicKeyInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Public Key"
+            android:textColor="@android:color/white"
+            android:textColorHint="@color/white" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Button to validate public key -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/validatePublicKeyButton"
+        android:layout_width="180dp"
+        android:layout_height="40dp"
+        android:text="Validate Key"
+        android:textColor="#1A1A1A"
+        android:textSize="14sp"
+        android:letterSpacing="0"
+        android:textAllCaps="false"
+        android:backgroundTint="#DCD6FF"
+        app:cornerRadius="20dp"
+        android:padding="0dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/publicKeyInputLayout"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 

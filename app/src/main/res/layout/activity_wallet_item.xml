@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:background="@color/black">
+
+    <!-- Wallet name -->
+    <TextView
+        android:id="@+id/walletName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <!-- Wallet status -->
+    <TextView
+        android:id="@+id/walletStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Not available"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="14sp"
+        android:visibility="gone" />
+</LinearLayout>
