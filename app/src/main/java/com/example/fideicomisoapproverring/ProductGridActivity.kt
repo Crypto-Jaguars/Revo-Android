@@ -383,6 +383,6 @@ class ProductGridActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val MAX_PAGES = 5 // Limit to 5 pages of products
+        private const val MAX_PAGES = 5 
     }
 } 
