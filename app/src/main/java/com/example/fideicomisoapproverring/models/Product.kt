@@ -2,13 +2,14 @@ package com.example.fideicomisoapproverring.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.math.BigDecimal
 
 @Parcelize
 data class Product(
     val id: String,
     val name: String,
     val description: String,
-    val price: Double,
+    val price: BigDecimal,
     val imageUrl: String,
     val isAvailable: Boolean,
     val farmerId: String,
@@ -20,7 +21,7 @@ data class Product(
             id = "loading",
             name = "",
             description = "",
-            price = 0.0,
+            price = BigDecimal.ZERO,
             imageUrl = "",
             isAvailable = false,
             farmerId = "",
