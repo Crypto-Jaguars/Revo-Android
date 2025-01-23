@@ -12,10 +12,16 @@ class ProductRepository(private val dataSource: ProductDataSource) {
     companion object {
         @Volatile
         private var instance: ProductRepository? = null
+        private var dataSource: ProductDataSource? = null
 
-        fun getInstance(): ProductRepository =
+        fun getInstance(source: ProductDataSource? = null): ProductRepository =
             instance ?: synchronized(this) {
-                instance ?: ProductRepository(SampleProductDataSource()).also { instance = it }
+                if (source != null) {
+                    dataSource = source
+                }
+                instance ?: ProductRepository(
+                    dataSource ?: SampleProductDataSource()
+                ).also { instance = it }
             }
     }
 } 

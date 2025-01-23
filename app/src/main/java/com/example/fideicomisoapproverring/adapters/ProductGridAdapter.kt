@@ -115,10 +115,32 @@ class ProductGridAdapter(
             )
         }
 
-        // Handle certifications with error checking
+        bindCertifications(holder, product)
+
+        // Set click listener with ripple effect
+        holder.itemView.setOnClickListener { onProductClick(product) }
+        holder.actionButton.setOnClickListener { onProductClick(product) }
+    }
+
+    private fun bindCertifications(holder: ProductViewHolder, product: Product) {
         holder.certificationsContainer.removeAllViews()
+        if (product.certifications.isEmpty()) {
+            holder.certificationsContainer.visibility = View.GONE
+            return
+        }
+        holder.certificationsContainer.visibility = View.VISIBLE
+
+        // Create a map of certification types to resource IDs
+        val certificationResources = mapOf(
+            "organic" to R.drawable.ic_organic_badge,
+            "fair_trade" to R.drawable.ic_fair_trade_badge
+        )
+
         product.certifications.forEach { certification ->
             try {
+                val resourceId = certificationResources[certification.lowercase()]
+                    ?: R.drawable.ic_certified_badge
+
                 val badge = ImageView(context).apply {
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -126,28 +148,16 @@ class ProductGridAdapter(
                     ).apply {
                         marginEnd = 8
                     }
-                    
-                    setImageResource(
-                        when (certification.lowercase()) {
-                            "organic" -> R.drawable.ic_organic_badge
-                            "fair_trade" -> R.drawable.ic_fair_trade_badge
-                            else -> R.drawable.ic_certified_badge
-                        }
-                    )
+                    setImageResource(resourceId)
+                    contentDescription = certification
                 }
                 holder.certificationsContainer.addView(badge)
             } catch (e: Exception) {
-                Log.e("ProductGridAdapter", "Failed to add certification badge: ${certification}", e)
-                // Add a fallback badge or skip invalid certification
-                if (holder.certificationsContainer.childCount == 0) {
-                    holder.certificationsContainer.visibility = View.GONE
-                }
+                Log.e("ProductGridAdapter", "Failed to add certification badge: $certification", e)
+                // Continue with next certification
+                return@forEach
             }
         }
-
-        // Set click listener with ripple effect
-        holder.itemView.setOnClickListener { onProductClick(product) }
-        holder.actionButton.setOnClickListener { onProductClick(product) }
     }
 
     class ProductDiffCallback : DiffUtil.ItemCallback<Product>() {

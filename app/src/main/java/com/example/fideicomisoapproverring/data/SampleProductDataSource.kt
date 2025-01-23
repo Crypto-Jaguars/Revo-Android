@@ -157,6 +157,12 @@ class SampleProductDataSource : ProductDataSource {
     ).associateBy { it.id }
 
     override suspend fun getProducts(page: Int, pageSize: Int): Result<List<Product>> = runCatching {
+        require(page > 0) { "Page must be greater than 0" }
+        require(pageSize > 0) { "Page size must be greater than 0" }
+        
+        val totalProducts = sampleProducts.size
+        require((page - 1) * pageSize < totalProducts) { "Page number exceeds available products" }
+        
         sampleProducts.values
             .drop((page - 1) * pageSize)
             .take(pageSize)
@@ -164,6 +170,6 @@ class SampleProductDataSource : ProductDataSource {
     }
 
     override suspend fun getProductById(id: String): Result<Product> = runCatching {
-        sampleProducts[id] ?: throw NoSuchElementException("Product not found")
+        requireNotNull(sampleProducts[id]) { "Product not found with id: $id" }
     }
 } 

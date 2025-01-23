@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
+import com.example.fideicomisoapproverring.data.SampleProductDataSource
 
 
 class ProductGridActivity : AppCompatActivity() {
@@ -35,7 +36,7 @@ class ProductGridActivity : AppCompatActivity() {
     private var currentPage = 1
     private var isLoading = false
     private val itemsPerPage = 10
-    private val repository = ProductRepository.getInstance()
+    private val repository = ProductRepository.getInstance(SampleProductDataSource())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
