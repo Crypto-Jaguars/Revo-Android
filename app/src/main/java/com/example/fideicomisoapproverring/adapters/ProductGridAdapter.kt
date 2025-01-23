@@ -1,6 +1,7 @@
 package com.example.fideicomisoapproverring.adapters
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -122,8 +123,11 @@ class ProductGridAdapter(
                 }
                 holder.certificationsContainer.addView(badge)
             } catch (e: Exception) {
-                // Log error but don't crash
-                e.printStackTrace()
+                Log.e("ProductGridAdapter", "Failed to add certification badge: ${certification}", e)
+                // Add a fallback badge or skip invalid certification
+                if (holder.certificationsContainer.childCount == 0) {
+                    holder.certificationsContainer.visibility = View.GONE
+                }
             }
         }
 
