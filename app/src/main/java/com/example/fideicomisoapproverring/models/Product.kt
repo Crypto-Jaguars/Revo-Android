@@ -1,5 +1,9 @@
 package com.example.fideicomisoapproverring.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Product(
     val id: String,
     val name: String,
@@ -8,11 +12,9 @@ data class Product(
     val imageUrl: String,
     val isAvailable: Boolean,
     val farmerId: String,
-    val certifications: List<String> = emptyList()
-) {
-    val isLoading: Boolean
-        get() = id == "loading"
-
+    val certifications: List<String>,
+    val isLoading: Boolean = false
+) : Parcelable {
     companion object {
         val LoadingItem = Product(
             id = "loading",
@@ -22,7 +24,8 @@ data class Product(
             imageUrl = "",
             isAvailable = false,
             farmerId = "",
-            certifications = emptyList()
+            certifications = emptyList(),
+            isLoading = true
         )
     }
 } 
