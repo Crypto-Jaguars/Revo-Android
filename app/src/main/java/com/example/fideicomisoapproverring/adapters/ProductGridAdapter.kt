@@ -20,6 +20,8 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.google.android.material.button.MaterialButton
 import com.example.fideicomisoapproverring.R
 import com.example.fideicomisoapproverring.models.Product
+import java.text.NumberFormat
+import java.util.*
 
 class ProductGridAdapter(
     private val context: Context,
@@ -34,6 +36,10 @@ class ProductGridAdapter(
         .override(500, 500)
         .format(DecodeFormat.PREFER_RGB_565)
         .transform(RoundedCorners(12))
+
+    private val currencyFormat = NumberFormat.getCurrencyInstance().apply {
+        currency = Currency.getInstance("USD")
+    }
 
     class ProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val image: ImageView = view.findViewById(R.id.productImage)
@@ -75,13 +81,13 @@ class ProductGridAdapter(
             .into(holder.image)
         
         holder.image.contentDescription = "Image of ${product.name}"
-        holder.price.contentDescription = "Price: ${String.format("$%.2f", product.price)}"
+        holder.price.contentDescription = "Price: ${currencyFormat.format(product.price)}"
         holder.itemView.contentDescription = "${product.name}, ${product.description}, " +
-            "Price: ${String.format("$%.2f", product.price)}, " +
+            "Price: ${currencyFormat.format(product.price)}, " +
             if (product.isAvailable) "In Stock" else "Out of Stock"
         
         holder.name.text = product.name
-        holder.price.text = String.format("$%.2f", product.price)
+        holder.price.text = currencyFormat.format(product.price)
         
         holder.availability.apply {
             text = if (product.isAvailable) "In Stock" else "Out of Stock"

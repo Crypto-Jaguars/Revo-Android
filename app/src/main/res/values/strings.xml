@@ -4,4 +4,11 @@
     <string name="contractId">Contract ID</string>
     <string name="enterButton">Enter</string>
     <string name="escrow_approver">Escrow_Approver</string>
+    <string name="view_details">View Details</string>
+    <string name="no_products_available">No Products Available</string>
+    <string name="check_back_later">Check back later for new products</string>
+    <string name="error_message">Oops! Something went wrong</string>
+    <string name="retry">Retry</string>
+    <string name="empty_state_image">Empty products illustration</string>
+    <string name="error_state_image">Error state illustration</string>
 </resources>

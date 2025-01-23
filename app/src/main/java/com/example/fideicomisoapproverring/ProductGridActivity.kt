@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.RecyclerView.ItemAnimator.ItemHolderInfo
 
 import com.example.fideicomisoapproverring.decorations.GridSpacingItemDecoration
+import android.util.Log
 
 
 class ProductGridActivity : AppCompatActivity() {
@@ -78,20 +79,25 @@ class ProductGridActivity : AppCompatActivity() {
     }
 
     private fun loadProducts() {
-   
         if (!swipeRefresh.isRefreshing) {
             showLoadingState()
         }
         emptyState.visibility = View.GONE
+        errorState.visibility = View.GONE
 
         Handler(Looper.getMainLooper()).postDelayed({
-            val products = createSampleProducts()
-            adapter.submitList(products)
-            
-         
-            hideLoadingState()
-            swipeRefresh.isRefreshing = false
-            emptyState.visibility = if (products.isEmpty()) View.VISIBLE else View.GONE
+            try {
+                val products = createSampleProducts()
+                adapter.submitList(products)
+                hideLoadingState()
+                swipeRefresh.isRefreshing = false
+                emptyState.visibility = if (products.isEmpty()) View.VISIBLE else View.GONE
+            } catch (e: Exception) {
+                errorState.visibility = View.VISIBLE
+                loadingState.visibility = View.GONE
+                swipeRefresh.isRefreshing = false
+                Log.e("ProductGridActivity", "Error loading products", e)
+            }
         }, 1500)
     }
 
@@ -240,16 +246,16 @@ class ProductGridActivity : AppCompatActivity() {
             setItemViewCacheSize(20)
             setHasFixedSize(true)
             
-            // Disable predictive animations for smoother scrolling
+         
             (layoutManager as? GridLayoutManager)?.apply {
                 isItemPrefetchEnabled = true
                 initialPrefetchItemCount = 12
             }
             
-            // Enable RecyclerView pooling
+         
             recycledViewPool.setMaxRecycledViews(0, 15)
             
-            // Custom item animator for smoother updates
+          
             itemAnimator = object : DefaultItemAnimator() {
                 override fun animateAdd(holder: RecyclerView.ViewHolder): Boolean {
                     dispatchAddFinished(holder)
@@ -267,7 +273,7 @@ class ProductGridActivity : AppCompatActivity() {
                 }
             }
             
-            // Add spacing decoration
+        
             addItemDecoration(
                 GridSpacingItemDecoration(
                     spanCount = spanCount,

@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:contentDescription="Product image"
+                android:contentDescription="@{product.name + ' product image'}"
                 android:importantForAccessibility="yes"/>
 
             <!-- Certification Badges -->
@@ -41,6 +41,8 @@
                 android:orientation="horizontal"
                 android:layout_gravity="top|end"
                 android:padding="8dp"
+                android:importantForAccessibility="yes"
+                android:contentDescription="@{product.certifications}"
                 android:background="@android:color/transparent"/>
         </FrameLayout>
 
@@ -74,14 +76,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textSize="14sp"/>
+                android:textSize="14sp"
+                android:importantForAccessibility="yes"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/actionButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="View Details"
+                android:text="@string/view_details"
                 android:textAllCaps="false"
                 app:cornerRadius="8dp"/>
         </LinearLayout>

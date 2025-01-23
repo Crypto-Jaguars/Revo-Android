@@ -39,13 +39,14 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:src="@drawable/ic_empty_products"
+            android:contentDescription="@string/empty_state_image"
             android:alpha="0.7"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="No Products Available"
+            android:text="@string/no_products_available"
             android:textSize="18sp"
             android:textColor="@color/white"/>
 
@@ -53,7 +54,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Check back later for new products"
+            android:text="@string/check_back_later"
             android:textSize="14sp"
             android:textColor="#80FFFFFF"
             android:gravity="center"/>
@@ -88,13 +89,14 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:src="@drawable/ic_error_state"
+            android:contentDescription="@string/error_state_image"
             android:alpha="0.7"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Oops! Something went wrong"
+            android:text="@string/error_message"
             android:textSize="18sp"
             android:textColor="@color/white"/>
 
@@ -103,7 +105,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Retry"
+            android:text="@string/retry"
             app:cornerRadius="8dp"/>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 
