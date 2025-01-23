@@ -8,4 +8,17 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#fff</color>
+    
+    <!-- Custom colors -->
+    <color name="in_stock">#4CAF50</color>
+    <color name="out_of_stock">#F44336</color>
+    
+    <!-- Add these colors -->
+    <color name="refresh_progress_1">#6200EE</color>
+    <color name="refresh_progress_2">#3700B3</color>
+    <color name="refresh_progress_3">#03DAC5</color>
+
+    <!-- Shimmer effect colors -->
+    <color name="shimmer_color">#1FFFFFFF</color>
+    <color name="shimmer_dark">#1A000000</color>
 </resources>
