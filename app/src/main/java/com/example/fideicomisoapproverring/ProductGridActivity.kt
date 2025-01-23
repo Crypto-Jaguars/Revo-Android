@@ -17,6 +17,11 @@ import androidx.recyclerview.widget.RecyclerView.ItemAnimator.ItemHolderInfo
 
 import com.example.fideicomisoapproverring.decorations.GridSpacingItemDecoration
 import android.util.Log
+import com.example.fideicomisoapproverring.data.ProductRepository
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import androidx.lifecycle.lifecycleScope
 
 
 class ProductGridActivity : AppCompatActivity() {
@@ -30,6 +35,7 @@ class ProductGridActivity : AppCompatActivity() {
     private var currentPage = 1
     private var isLoading = false
     private val itemsPerPage = 10
+    private val repository = ProductRepository.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,35 +91,102 @@ class ProductGridActivity : AppCompatActivity() {
         emptyState.visibility = View.GONE
         errorState.visibility = View.GONE
 
-        Handler(Looper.getMainLooper()).postDelayed({
+        lifecycleScope.launch(Dispatchers.Main) {
             try {
-                val products = createSampleProducts()
-                adapter.submitList(products)
-                hideLoadingState()
-                swipeRefresh.isRefreshing = false
-                emptyState.visibility = if (products.isEmpty()) View.VISIBLE else View.GONE
+                val result = withContext(Dispatchers.IO) {
+                    repository.getProducts(1, itemsPerPage)
+                }
+                result.fold(
+                    onSuccess = { products ->
+                        adapter.submitList(products)
+                        hideLoadingState()
+                        swipeRefresh.isRefreshing = false
+                        emptyState.visibility = if (products.isEmpty()) View.VISIBLE else View.GONE
+                    },
+                    onFailure = { e ->
+                        errorState.visibility = View.VISIBLE
+                        loadingState.visibility = View.GONE
+                        swipeRefresh.isRefreshing = false
+                        Log.e("ProductGridActivity", "Error loading products", e)
+                    }
+                )
             } catch (e: Exception) {
                 errorState.visibility = View.VISIBLE
                 loadingState.visibility = View.GONE
                 swipeRefresh.isRefreshing = false
                 Log.e("ProductGridActivity", "Error loading products", e)
             }
-        }, 1500)
+        }
     }
 
     private fun loadMoreProducts() {
         if (isLoading) return
         isLoading = true
+        showLoadingMoreIndicator()
         
-        Handler(Looper.getMainLooper()).postDelayed({
-            val newProducts = createSampleProducts().take(itemsPerPage)
-            val currentList = ArrayList(adapter.currentList)
-            currentList.addAll(newProducts)
+        lifecycleScope.launch(Dispatchers.Main) {
+            try {
+                if (currentPage >= MAX_PAGES) {
+                    hideLoadingMoreIndicator()
+                    return@launch
+                }
+
+                val result = withContext(Dispatchers.IO) {
+                    repository.getProducts(currentPage + 1, itemsPerPage)
+                }
+                result.fold(
+                    onSuccess = { newProducts ->
+                        if (newProducts.isEmpty()) {
+                            hideLoadingMoreIndicator()
+                            return@launch
+                        }
+                        
+                        val currentList = ArrayList(adapter.currentList)
+                        currentList.addAll(newProducts)
+                        adapter.submitList(currentList)
+                        
+                        currentPage++
+                        isLoading = false
+                        hideLoadingMoreIndicator()
+                    },
+                    onFailure = { e ->
+                        isLoading = false
+                        hideLoadingMoreIndicator()
+                        showLoadMoreError()
+                        Log.e("ProductGridActivity", "Error loading more products", e)
+                    }
+                )
+            } catch (e: Exception) {
+                isLoading = false
+                hideLoadingMoreIndicator()
+                showLoadMoreError()
+                Log.e("ProductGridActivity", "Error loading more products", e)
+            }
+        }
+    }
+
+    private fun showLoadingMoreIndicator() {
+     
+        val currentList = ArrayList(adapter.currentList)
+        currentList.add(Product.LoadingItem)
+        adapter.submitList(currentList)
+    }
+
+    private fun hideLoadingMoreIndicator() {
+   
+        val currentList = ArrayList(adapter.currentList)
+        if (currentList.lastOrNull()?.isLoading == true) {
+            currentList.removeAt(currentList.lastIndex)
             adapter.submitList(currentList)
-            
-            currentPage++
-            isLoading = false
-        }, 1000)
+        }
+    }
+
+    private fun showLoadMoreError() {
+        Toast.makeText(
+            this,
+            getString(R.string.error_loading_more_products),
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun startProductDetails(product: Product) {
@@ -306,5 +379,9 @@ class ProductGridActivity : AppCompatActivity() {
             resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE -> 3
             else -> 2  
         }
+    }
+
+    companion object {
+        private const val MAX_PAGES = 5 // Limit to 5 pages of products
     }
 } 

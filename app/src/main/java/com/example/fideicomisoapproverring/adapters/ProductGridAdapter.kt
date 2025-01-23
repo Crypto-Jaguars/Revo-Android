@@ -60,6 +60,20 @@ class ProductGridAdapter(
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val product = getItem(position)
         
+        if (product.isLoading) {
+           
+            holder.apply {
+                image.setImageResource(R.drawable.product_placeholder)
+                name.text = ""
+                price.text = ""
+                availability.visibility = View.GONE
+                actionButton.visibility = View.GONE
+                certificationsContainer.visibility = View.GONE
+                itemView.setOnClickListener(null)
+            }
+            return
+        }
+
         // Preload next few images
         if (position <= itemCount - 4) {
             for (i in 1..3) {
@@ -142,7 +156,7 @@ class ProductGridAdapter(
         }
 
         override fun areContentsTheSame(oldItem: Product, newItem: Product): Boolean {
-            return oldItem == newItem
+            return oldItem == newItem || (oldItem.isLoading && newItem.isLoading)
         }
     }
 } 
