@@ -74,7 +74,7 @@ class ProductGridAdapter(
             return
         }
 
-        // Preload next few images
+      
         if (position <= itemCount - 4) {
             for (i in 1..3) {
                 val nextPosition = position + i
@@ -88,7 +88,7 @@ class ProductGridAdapter(
             }
         }
 
-        // Load current image
+       
         Glide.with(context)
             .load(product.imageUrl)
             .apply(glideOptions)
@@ -117,7 +117,7 @@ class ProductGridAdapter(
 
         bindCertifications(holder, product)
 
-        // Set click listener with ripple effect
+      
         holder.itemView.setOnClickListener { onProductClick(product) }
         holder.actionButton.setOnClickListener { onProductClick(product) }
     }
@@ -130,7 +130,7 @@ class ProductGridAdapter(
         }
         holder.certificationsContainer.visibility = View.VISIBLE
 
-        // Create a map of certification types to resource IDs
+    
         val certificationResources = mapOf(
             "organic" to R.drawable.ic_organic_badge,
             "fair_trade" to R.drawable.ic_fair_trade_badge
@@ -154,7 +154,7 @@ class ProductGridAdapter(
                 holder.certificationsContainer.addView(badge)
             } catch (e: Exception) {
                 Log.e("ProductGridAdapter", "Failed to add certification badge: $certification", e)
-                // Continue with next certification
+              
                 return@forEach
             }
         }
