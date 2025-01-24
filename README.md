@@ -1,4 +1,3 @@
-
 # Revolutionary Farmers Marketplace
 Revolutionary Farmers Marketplace is an Android application designed to facilitate secure trading between farmers and buyers using the [Trustless Work API](https://docs.trustlesswork.com/trustless-work) and Stellar network. This application enables farmers to list their harvested products and buyers to purchase them with the security of smart escrows.
 
@@ -17,32 +16,54 @@ The project is located in the `Revo-Android` folder and is developed using Andro
 - [JDK](https://www.oracle.com/java/technologies/javase-downloads.html): Version 8 or higher
 - An Android device or a configured emulator
 
-## ⚙️ Installation
-Follow these steps to set up the project on your local machine:
+## 🛠️ Setup & Installation
 
 1. **Clone the Repository**
-   Open a terminal and run the following command to clone the repository:
    ```bash
    git clone https://github.com/Crypto-Jaguars/Revo-Android.git
-   ```
-
-2. **Open the Project in Android Studio**
-   Navigate to the android folder inside the cloned repository:
-   ```bash
    cd Revo-Android
    ```
-   Then, open the project in Android Studio:
-   - Launch **Android Studio**
-   - Click on "Open an existing Android Studio project"
 
-3. **Configure Dependencies**
-   Add the Stellar SDK and other required dependencies in your build.gradle file:
+2. **Setup Development Environment**
+   - Install Android Studio (latest version)
+   - Install JDK 11 or higher
+   - Install the Android SDK (minimum API 28)
+
+3. **Project Configuration**
+   - Open the project in Android Studio
+   - Wait for Gradle sync to complete
+   - Add these to your gradle.properties if not present:
+     ```properties
+     android.useAndroidX=true
+     kotlin.code.style=official
+     android.nonTransitiveRClass=true
+     ```
+
+4. **Clean and Build**
    ```bash
-   implementation 'stellar-sdk:stellar-sdk:latest_version'
+   ./gradlew clean
+   ./gradlew build
    ```
 
-4. **Configure the Trustless Work API**
-   Follow the [Trustless Work documentation](https://docs.trustlesswork.com/trustless-work) to correctly integrate the API into your application. Make sure to have all the necessary credentials and configurations, such as API keys and corresponding endpoints.
+5. **Run the Application**
+   - Connect an Android device or start an emulator (API 28+)
+   - Run the app using Android Studio's "Run" button
+   - Or use command line:
+     ```bash
+     ./gradlew installDebug
+     ```
+
+## 🔧 Troubleshooting
+
+If you encounter build errors:
+1. File -> Invalidate Caches / Restart
+2. Delete the .gradle and build folders:
+   ```bash
+   rm -rf .gradle
+   rm -rf app/build
+   ```
+3. Sync project with Gradle files
+4. Clean and rebuild project
 
 ## 🚀 Usage
 Once you have installed and configured the project, follow these steps to run and use the application:

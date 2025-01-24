@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
 import com.example.fideicomisoapproverring.data.SampleProductDataSource
 import kotlinx.coroutines.Job
+import android.os.Parcelable
 
 
 class ProductGridActivity : AppCompatActivity() {
@@ -99,7 +100,7 @@ class ProductGridActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         outState.putInt(KEY_CURRENT_PAGE, currentPage)
         outState.putBoolean(KEY_IS_LOADING, isLoading)
-        outState.putParcelableArrayList(KEY_PRODUCTS, ArrayList(adapter.currentList))
+        outState.putParcelableArrayList(KEY_PRODUCTS, ArrayList(adapter.currentList.filterIsInstance<Parcelable>()))
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
