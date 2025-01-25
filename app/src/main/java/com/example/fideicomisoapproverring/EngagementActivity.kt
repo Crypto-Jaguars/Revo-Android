@@ -5,10 +5,8 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.fideicomisoapproverring.ui.theme.FideicomisoApproverRingTheme
-import com.ringofrings.sdk.core.nfc.RingOfRingsNFC as RingOfRingsNFC;
-import com.ringofrings.sdk.core.mfa.RingOfRingsMFA as RingOfRingsMFA;
-import com.ringofrings.ringofrings.core.utils.crypto.CryptoUtil.Companion as RingOfRingsSDK;
+import com.ringofrings.ringofrings.core.utils.crypto.CryptoUtil.Companion as RingOfRingsSDK
+import com.ringofrings.sdk.core.nfc.RingOfRingsNFC as RingOfRingsNFC
 
 class EngagementActivity : AppCompatActivity() {
 

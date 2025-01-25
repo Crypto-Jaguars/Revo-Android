@@ -5,14 +5,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.test.core.app.ActivityScenario
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import okhttp3.Call
-import okhttp3.OkHttpClient
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.*
-import org.junit.Assert.*
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)

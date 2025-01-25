@@ -75,6 +75,8 @@ android {
 
 
 dependencies {
+    implementation(projects.onboarding.guests)
+    implementation(projects.theme)
     implementation(libs.androidx.multidex)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
@@ -99,9 +101,7 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.activity)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.fideicomisoapproverring.guests"
+    namespace = "com.example.fideicomisoapproverring.theme"
     compileSdk = 35
 
     defaultConfig {
@@ -12,6 +12,14 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 
     buildTypes {
@@ -29,10 +37,13 @@ android {
 }
 
 dependencies {
-    implementation(projects.theme)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.material3)
+    implementation(libs.google.font)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

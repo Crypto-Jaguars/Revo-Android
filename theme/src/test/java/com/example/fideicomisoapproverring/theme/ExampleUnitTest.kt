@@ -1,4 +1,4 @@
-package com.example.fideicomisoapproverring
+package com.example.fideicomisoapproverring.theme
 
 import org.junit.Assert.*
 import org.junit.Test
