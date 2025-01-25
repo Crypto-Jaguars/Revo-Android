@@ -39,8 +39,6 @@ class EscrowApproverActivity : AppCompatActivity() {
 
         connectButton.setOnClickListener {
             showWalletSelectionDialog()
-
-
         }
 
         validateKeyButton.setOnClickListener {
