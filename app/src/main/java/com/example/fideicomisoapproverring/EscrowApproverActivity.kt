@@ -36,11 +36,8 @@ class EscrowApproverActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-
         connectButton.setOnClickListener {
             showWalletSelectionDialog()
-
-
         }
 
         validateKeyButton.setOnClickListener {
@@ -77,11 +74,6 @@ class EscrowApproverActivity : AppCompatActivity() {
         }
         walletSelectionDialog.show(supportFragmentManager, "WalletSelection")
     }
-
-
-
-
-
 
     private fun validatePublicKey(publicKey: String) {
         val url = "https://horizon-testnet.stellar.org/accounts/$publicKey"
