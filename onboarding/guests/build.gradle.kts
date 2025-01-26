@@ -48,6 +48,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Optional - Constraint Layout
+    implementation(libs.androidx.ui.compose.constraintlayout)
     // Optional - Integration with ViewModels
     implementation(libs.androidx.ui.viewmodel)
     // UI Tests

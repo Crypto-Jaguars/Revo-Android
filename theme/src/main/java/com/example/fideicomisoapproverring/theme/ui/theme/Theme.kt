@@ -275,6 +275,7 @@ fun RingCoreTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = RingCoreTypography,
+        shapes = shape,
         content = content
     )
 }
