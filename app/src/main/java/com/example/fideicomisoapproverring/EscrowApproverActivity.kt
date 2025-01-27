@@ -8,15 +8,21 @@ import android.text.TextWatcher
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.launch
 import okhttp3.*
 import java.io.IOException
+import com.example.fideicomisoapproverring.wallet.WalletManager
+import com.example.fideicomisoapproverring.wallet.WalletRepository
+import com.example.fideicomisoapproverring.wallet.WalletState
 
 class EscrowApproverActivity : AppCompatActivity() {
 
     private lateinit var connectButton: Button
     private lateinit var validateKeyButton: Button
     private lateinit var publicKeyInput: TextInputEditText
+    private lateinit var walletManager: WalletManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +33,34 @@ class EscrowApproverActivity : AppCompatActivity() {
         validateKeyButton = findViewById(R.id.validatePublicKeyButton)
         publicKeyInput = findViewById(R.id.publicKeyInput)
 
+        // Initialize WalletManager
+        walletManager = WalletManager(WalletRepository(applicationContext))
+
+        // Observe wallet state
+        lifecycleScope.launch {
+            walletManager.walletState.collect { state ->
+                when (state) {
+                    is WalletState.Disconnected -> {
+                        connectButton.isEnabled = true
+                        validateKeyButton.isEnabled = false
+                    }
+                    is WalletState.Connecting -> {
+                        connectButton.isEnabled = false
+                        // Show loading indicator
+                    }
+                    is WalletState.Connected -> {
+                        connectButton.isEnabled = false
+                        validateKeyButton.isEnabled = true
+                        publicKeyInput.setText(state.publicKey)
+                    }
+                    is WalletState.Error -> {
+                        connectButton.isEnabled = true
+                        Toast.makeText(this@EscrowApproverActivity, state.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+
         publicKeyInput.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 validateKeyButton.isEnabled = !s.isNullOrEmpty()
@@ -36,11 +70,8 @@ class EscrowApproverActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-
         connectButton.setOnClickListener {
             showWalletSelectionDialog()
-
-
         }
 
         validateKeyButton.setOnClickListener {
@@ -70,18 +101,12 @@ class EscrowApproverActivity : AppCompatActivity() {
 
     private fun showWalletSelectionDialog() {
         val walletSelectionDialog = WalletSelection { walletName ->
-            Toast.makeText(this, "Selected wallet: $walletName", Toast.LENGTH_SHORT).show()
-            if (walletName == "LOBSTR") {
-                // If LOBSTR is selected, it is automatically redirected from WalletSelection
+            lifecycleScope.launch {
+                walletManager.connectWallet(walletName)
             }
         }
         walletSelectionDialog.show(supportFragmentManager, "WalletSelection")
     }
-
-
-
-
-
 
     private fun validatePublicKey(publicKey: String) {
         val url = "https://horizon-testnet.stellar.org/accounts/$publicKey"

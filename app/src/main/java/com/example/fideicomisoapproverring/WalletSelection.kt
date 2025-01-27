@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import java.net.URLEncoder
 
 class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSheetDialogFragment() {
 
@@ -51,7 +52,11 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSh
 
     private fun redirectToLobstrWallet() {
         try {
-            val lobstrUri = "lobstr://"
+            val lobstrUri = "lobstr://sign?" +
+                "xdr=${URLEncoder.encode(challengeTx, "UTF-8")}&" +
+                "callback=fideicomisoapproverring://wallet-callback&" +
+                "pubkey=${URLEncoder.encode(sourceAccount, "UTF-8")}"
+            
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(lobstrUri))
             intent.addCategory(Intent.CATEGORY_BROWSABLE)
             startActivity(intent)
