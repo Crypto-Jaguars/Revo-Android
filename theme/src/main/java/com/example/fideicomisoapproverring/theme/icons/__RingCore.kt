@@ -17,10 +17,10 @@ object RingCore
 private var __AllIcons: ____KtList<ImageVector>? = null
 
 val RingCore.AllIcons: ____KtList<ImageVector>
-  get() {
-    if (__AllIcons != null) {
-      return __AllIcons!!
+    get() {
+        if (__AllIcons != null) {
+            return __AllIcons!!
+        }
+        __AllIcons = listOf(IcAbout, IcArrowTopRight, IcCategories, IcFaq, IcGroup, IcSettings, IcUpwardTrend, IcWallet, IcCalendarChecked)
+        return __AllIcons!!
     }
-    __AllIcons = listOf(IcAbout, IcArrowTopRight, IcCategories, IcFaq, IcGroup, IcSettings, IcUpwardTrend, IcWallet, IcCalendarChecked)
-    return __AllIcons!!
-  }

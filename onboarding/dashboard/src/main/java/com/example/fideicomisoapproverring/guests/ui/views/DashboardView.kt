@@ -78,7 +78,7 @@ import java.util.Locale
 fun DashboardView(
     navController: NavController = rememberNavController(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
-    onMenuClick: (String) -> Unit = {}
+    onMenuClick: (String) -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
     ModalNavigationDrawer(
@@ -90,7 +90,7 @@ fun DashboardView(
             ) {
                 ModalDrawerContentView(
                     menus = NavigationDrawerMenuItem.defaultMenus,
-                    onMenuClick = onMenuClick
+                    onMenuClick = onMenuClick,
                 )
             }
         },
@@ -100,12 +100,14 @@ fun DashboardView(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(
-                                alpha = 0.1F
+                        colors =
+                            TopAppBarDefaults.topAppBarColors(
+                                containerColor =
+                                    MaterialTheme.colorScheme.primaryContainer.copy(
+                                        alpha = 0.1F,
+                                    ),
+                                titleContentColor = MaterialTheme.colorScheme.onBackground,
                             ),
-                            titleContentColor = MaterialTheme.colorScheme.onBackground,
-                        ),
                         navigationIcon = {
                             IconButton(onClick = {
                                 coroutineScope.launch {
@@ -119,18 +121,19 @@ fun DashboardView(
                                 Icon(
                                     imageVector = Icons.Default.Menu,
                                     tint = MaterialTheme.colorScheme.onBackground,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
                             }
                         },
                         title = {
                             Text(
-                                text = stringResource(
-                                    R.string.title_greeting_prefix,
-                                    stringResource(R.string.title_guest)
-                                )
+                                text =
+                                    stringResource(
+                                        R.string.title_greeting_prefix,
+                                        stringResource(R.string.title_guest),
+                                    ),
                             )
-                        }
+                        },
                     )
                 },
                 bottomBar = {
@@ -147,12 +150,13 @@ fun DashboardView(
                                     )
                                 },
                                 label = { Text(text = stringResource(item.label)) },
-                                selected = currentDestination?.hierarchy?.any {
-                                    it.hasRoute(
-                                        item.route,
-                                        null
-                                    )
-                                } == true,
+                                selected =
+                                    currentDestination?.hierarchy?.any {
+                                        it.hasRoute(
+                                            item.route,
+                                            null,
+                                        )
+                                    } == true,
                                 onClick = {
                                     navController.navigate(item.route) {
                                         // Pop up to the start destination of the graph to
@@ -167,21 +171,20 @@ fun DashboardView(
                                         // Restore state when reselecting a previously selected item
                                         restoreState = true
                                     }
-                                }
+                                },
                             )
                         }
                     }
                 },
-                containerColor = Color.Transparent
+                containerColor = Color.Transparent,
             ) { contentPadding ->
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding)
-                        .verticalScroll(state = rememberScrollState())
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(contentPadding)
+                            .verticalScroll(state = rememberScrollState()),
                 ) {
-
-
                 }
             }
         }
@@ -191,12 +194,13 @@ fun DashboardView(
 @Composable
 fun ModalDrawerContentView(
     menus: Array<NavigationDrawerMenuItem>,
-    onMenuClick: (String) -> Unit = {}
+    onMenuClick: (String) -> Unit = {},
 ) {
     Column(
-        modifier = Modifier
-            .wrapContentSize()
-            .clip(shape = MaterialTheme.shapes.large)
+        modifier =
+            Modifier
+                .wrapContentSize()
+                .clip(shape = MaterialTheme.shapes.large),
     ) {
         menus.forEach {
             if (it.title == R.string.label_connect_wallet) {
@@ -216,7 +220,6 @@ fun ModalDrawerContentView(
                     onClick = { onMenuClick(it.route) },
                 )
             }
-
         }
     }
 }
@@ -231,23 +234,27 @@ fun TradeStatisticCardView(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors().copy(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                alpha = 0.1F
-            )
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        )
+        colors =
+            CardDefaults.cardColors().copy(
+                containerColor =
+                    MaterialTheme.colorScheme.surfaceVariant.copy(
+                        alpha = 0.1F,
+                    ),
+            ),
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 8.dp,
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .background(color = Color.Transparent)
+            modifier =
+                Modifier
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .background(color = Color.Transparent),
         ) {
             Row(
                 modifier = Modifier.background(color = Color.Transparent),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(imageVector = icon, contentDescription = null)
 
@@ -256,7 +263,7 @@ fun TradeStatisticCardView(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
 
@@ -264,10 +271,11 @@ fun TradeStatisticCardView(
 
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.onSurface
+                style =
+                    MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
@@ -276,68 +284,76 @@ fun TradeStatisticCardView(
 @Composable
 fun AuthenticateWalletCardView(
     modifier: Modifier = Modifier,
-    onAuthenticate: () -> Unit = {}
+    onAuthenticate: () -> Unit = {},
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors().copy(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                alpha = 0.26F
-            )
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        )
+        colors =
+            CardDefaults.cardColors().copy(
+                containerColor =
+                    MaterialTheme.colorScheme.surfaceVariant.copy(
+                        alpha = 0.26F,
+                    ),
+            ),
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 8.dp,
+            ),
     ) {
         ConstraintLayout(
-            modifier = Modifier
-                .wrapContentSize()
+            modifier =
+                Modifier
+                    .wrapContentSize(),
         ) {
             val (topLeftEllipsisConstraint, bottomRightEllipsisConstraint, contentConstraint) = createRefs()
 
             Image(
-                modifier = Modifier
-                    .constrainAs(topLeftEllipsisConstraint) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                    }
-                    .offset(x = (-36).dp, y = (-36).dp)
-                    .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+                modifier =
+                    Modifier
+                        .constrainAs(topLeftEllipsisConstraint) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                        }
+                        .offset(x = (-36).dp, y = (-36).dp)
+                        .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
                 painter = painterResource(R.drawable.img_purple_ellipse),
                 contentDescription = null,
             )
 
             Image(
-                modifier = Modifier
-                    .constrainAs(bottomRightEllipsisConstraint) {
-                        bottom.linkTo(parent.bottom)
-                        end.linkTo(parent.end)
-                    }
-                    .offset(x = (36).dp, y = (36).dp)
-                    .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+                modifier =
+                    Modifier
+                        .constrainAs(bottomRightEllipsisConstraint) {
+                            bottom.linkTo(parent.bottom)
+                            end.linkTo(parent.end)
+                        }
+                        .offset(x = (36).dp, y = (36).dp)
+                        .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
                 painter = painterResource(R.drawable.img_purple_ellipse),
                 contentDescription = null,
             )
 
             Column(
-                modifier = Modifier
-                    .constrainAs(contentConstraint) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                    .wrapContentSize()
-                    .padding(horizontal = 16.dp, vertical = 24.dp)
-                    .background(color = Color.Transparent)
+                modifier =
+                    Modifier
+                        .constrainAs(contentConstraint) {
+                            top.linkTo(parent.top)
+                            bottom.linkTo(parent.bottom)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        }
+                        .wrapContentSize()
+                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                        .background(color = Color.Transparent),
             ) {
                 Text(
                     text = stringResource(R.string.title_personalized_experience),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFA896FE)
-                    ),
+                    style =
+                        MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFA896FE),
+                        ),
                     // color = MaterialTheme.colorScheme.primary
                 )
 
@@ -346,7 +362,7 @@ fun AuthenticateWalletCardView(
                 Text(
                     text = stringResource(R.string.msg_wallet_authentication),
                     color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -354,19 +370,19 @@ fun AuthenticateWalletCardView(
                 Button(
                     onClick = onAuthenticate,
                     shape = MaterialTheme.shapes.medium,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
                 ) {
                     Text(
                         text = stringResource(R.string.label_connect_wallet),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             }
         }
-
     }
 }
 
@@ -379,18 +395,22 @@ fun TrendingProductsView(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors().copy(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                alpha = 0.1F
-            )
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        )
+        colors =
+            CardDefaults.cardColors().copy(
+                containerColor =
+                    MaterialTheme.colorScheme.surfaceVariant.copy(
+                        alpha = 0.1F,
+                    ),
+            ),
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 8.dp,
+            ),
     ) {
         Column(
-            modifier = modifier
-                .padding(horizontal = 24.dp, vertical = 16.dp)
+            modifier =
+                modifier
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
         ) {
             products.forEach {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -400,22 +420,23 @@ fun TrendingProductsView(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline
+                    color = MaterialTheme.colorScheme.outline,
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onViewAllProducts),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onViewAllProducts),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Text(
                     text = stringResource(R.string.action_view_all),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -423,12 +444,11 @@ fun TrendingProductsView(
                 Icon(
                     imageVector = RingCore.IcArrowTopRight,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
     }
-
 }
 
 @Composable
@@ -439,7 +459,7 @@ fun TrendingProductItemView(
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.Start,
     ) {
         product.drawableRes?.let {
             Image(
@@ -451,17 +471,19 @@ fun TrendingProductItemView(
 
         Column(
             modifier = modifier.weight(1F),
-            horizontalAlignment = Alignment.End
+            horizontalAlignment = Alignment.End,
         ) {
             Text(
-                text = stringResource(
-                    R.string.currency_symbol_usd,
-                    String.format(Locale.getDefault(), "%.2f", product.price)
-                ),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.onSurface
+                text =
+                    stringResource(
+                        R.string.currency_symbol_usd,
+                        String.format(Locale.getDefault(), "%.2f", product.price),
+                    ),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = MaterialTheme.colorScheme.onSurface,
             )
 
             Spacer(Modifier.height(4.dp))
@@ -469,7 +491,7 @@ fun TrendingProductItemView(
             Text(
                 text = stringResource(R.string.label_unit_prefix, product.unit),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
@@ -481,27 +503,32 @@ fun HeadlineBannerView(
     onAuthenticate: () -> Unit = {},
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier =
+            modifier
+                .fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors().copy(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                alpha = 0.1F
-            )
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        )
+        colors =
+            CardDefaults.cardColors().copy(
+                containerColor =
+                    MaterialTheme.colorScheme.surfaceVariant.copy(
+                        alpha = 0.1F,
+                    ),
+            ),
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 8.dp,
+            ),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp)
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp),
         ) {
             Text(
                 text = stringResource(R.string.title_welcome_msg),
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.onSurface
+                style =
+                    MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = MaterialTheme.colorScheme.onSurface,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -509,7 +536,7 @@ fun HeadlineBannerView(
             Text(
                 text = stringResource(R.string.msg_wallet_connection_perks),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -517,14 +544,15 @@ fun HeadlineBannerView(
             Button(
                 onClick = onAuthenticate,
                 shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
             ) {
                 Text(
                     text = stringResource(R.string.label_connect_wallet),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
@@ -548,11 +576,12 @@ private fun TrendingProductItemPreview() {
         darkTheme = true,
     ) {
         TrendingProductItemView(
-            product = AgriculturalProduct(
-                drawableRes = R.drawable.img_corn,
-                price = 2890.00F,
-                unit = "kg"
-            ),
+            product =
+                AgriculturalProduct(
+                    drawableRes = R.drawable.img_corn,
+                    price = 2890.00F,
+                    unit = "kg",
+                ),
         )
     }
 }
@@ -571,7 +600,7 @@ private fun TrendingProductsPreview() {
 @Composable
 private fun AuthenticateWalletCardPreview() {
     RingCoreTheme(
-        darkTheme = true
+        darkTheme = true,
     ) {
         AuthenticateWalletCardView()
     }
@@ -581,35 +610,34 @@ private fun AuthenticateWalletCardPreview() {
 @Composable
 private fun TradeStatisticCardPreview() {
     RingCoreTheme(
-        darkTheme = true
+        darkTheme = true,
     ) {
         TradeStatisticCardView(
             icon = RingCore.IcUpwardTrend,
             label = stringResource(R.string.label_market_cap),
-            value = stringResource(R.string.currency_symbol_usd, "1.82T")
+            value = stringResource(R.string.currency_symbol_usd, "1.82T"),
         )
     }
 }
 
 @Preview(
     showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_NO
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
 )
 @Composable
 private fun ModalDrawerContentPreview() {
     RingCoreTheme(
-        darkTheme = true
+        darkTheme = true,
     ) {
         ModalDrawerContentView(menus = NavigationDrawerMenuItem.defaultMenus)
     }
-
 }
 
 @Preview
 @Composable
 private fun DashboardPreview() {
     RingCoreTheme(
-        darkTheme = true
+        darkTheme = true,
     ) {
         DashboardView()
     }

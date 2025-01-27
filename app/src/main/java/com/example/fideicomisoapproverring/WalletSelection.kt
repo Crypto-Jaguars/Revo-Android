@@ -12,12 +12,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSheetDialogFragment() {
-
     data class WalletOption(val name: String, val isAvailable: Boolean)
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
         val view = inflater.inflate(R.layout.activity_fragment_wallet_selection, container, false)
 
@@ -25,26 +25,28 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSh
         walletList.layoutManager = LinearLayoutManager(context)
 
         // Lista de wallets disponibles
-        val wallets = listOf(
-            WalletOption("xBull", true),
-            WalletOption("Albedo", true),
-            WalletOption("LOBSTR", true),
-            WalletOption("Freighter", false),
-            WalletOption("Rabet", false),
-            WalletOption("Hana Wallet", false)
-        )
+        val wallets =
+            listOf(
+                WalletOption("xBull", true),
+                WalletOption("Albedo", true),
+                WalletOption("LOBSTR", true),
+                WalletOption("Freighter", false),
+                WalletOption("Rabet", false),
+                WalletOption("Hana Wallet", false),
+            )
 
-        walletList.adapter = WalletAdapter(wallets) { wallet ->
-            if (wallet.isAvailable) {
-                onWalletSelected(wallet.name)
-                if (wallet.name == "LOBSTR") {
-                    redirectToLobstrWallet()
+        walletList.adapter =
+            WalletAdapter(wallets) { wallet ->
+                if (wallet.isAvailable) {
+                    onWalletSelected(wallet.name)
+                    if (wallet.name == "LOBSTR") {
+                        redirectToLobstrWallet()
+                    }
+                    dismiss()
+                } else {
+                    Toast.makeText(context, "${wallet.name} is not yet available.", Toast.LENGTH_SHORT).show()
                 }
-                dismiss()
-            } else {
-                Toast.makeText(context, "${wallet.name} is not yet available.", Toast.LENGTH_SHORT).show()
             }
-        }
 
         return view
     }

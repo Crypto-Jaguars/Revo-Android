@@ -19,7 +19,6 @@ import java.io.IOException
 import java.lang.Exception
 
 class FindEscrowActivity : AppCompatActivity() {
-
     private lateinit var loadingPanel: LinearLayout
     private lateinit var form: LinearLayout
 
@@ -103,41 +102,53 @@ class FindEscrowActivity : AppCompatActivity() {
         contractIdInput.setText("")
     }
 
-    private fun fetchEngagementData(engagementId: String, contractId: String) {
+    private fun fetchEngagementData(
+        engagementId: String,
+        contractId: String,
+    ) {
         val url = "https://api.trustlesswork.com/escrow/get-escrow-by-engagement-id?contractId=$contractId&engagementId=$engagementId"
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(url)
-            .build()
+        val request =
+            Request.Builder()
+                .url(url)
+                .build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    loadingPanel.visibility = View.GONE
-                    Toast.makeText(this@FindEscrowActivity, "Connection error", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    val responseBody = response.body?.string()
+        client.newCall(request).enqueue(
+            object : Callback {
+                override fun onFailure(
+                    call: Call,
+                    e: IOException,
+                ) {
                     runOnUiThread {
-                        val intent = Intent(this@FindEscrowActivity, EscrowDetailsActivity::class.java)
-                        if (response.code == 200) {
-                            intent.putExtra("escrowData", responseBody.toString())
-                            intent.putExtra("engagementID", engagementId)
+                        loadingPanel.visibility = View.GONE
+                        Toast.makeText(this@FindEscrowActivity, "Connection error", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onResponse(
+                    call: Call,
+                    response: Response,
+                ) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body?.string()
+                        runOnUiThread {
+                            val intent = Intent(this@FindEscrowActivity, EscrowDetailsActivity::class.java)
+                            if (response.code == 200) {
+                                intent.putExtra("escrowData", responseBody.toString())
+                                intent.putExtra("engagementID", engagementId)
+                            }
+                            startActivity(intent)
                         }
-                        startActivity(intent)
-                    }
-                } else {
-                    runOnUiThread {
-                        val intent = Intent(this@FindEscrowActivity, EscrowDetailsActivity::class.java)
-                        intent.putExtra("engagementID", engagementId)
-                        startActivity(intent)
+                    } else {
+                        runOnUiThread {
+                            val intent = Intent(this@FindEscrowActivity, EscrowDetailsActivity::class.java)
+                            intent.putExtra("engagementID", engagementId)
+                            startActivity(intent)
+                        }
                     }
                 }
-            }
-        })
+            },
+        )
     }
 
     private fun fetchBalance(publicKey: String) {
@@ -145,28 +156,36 @@ class FindEscrowActivity : AppCompatActivity() {
         val client = OkHttpClient()
         val request = Request.Builder().url(url).build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(this@FindEscrowActivity, "Error connecting to server: ${e.message}", Toast.LENGTH_SHORT).show()
+        client.newCall(request).enqueue(
+            object : Callback {
+                override fun onFailure(
+                    call: Call,
+                    e: IOException,
+                ) {
+                    runOnUiThread {
+                        Toast.makeText(this@FindEscrowActivity, "Error connecting to server: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }
 
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    val responseBody = response.body?.string()
-                    val balance = parseBalance(responseBody)
-                    runOnUiThread {
-                        balanceTextView.visibility = View.VISIBLE
-                        balanceTextView.text = "Balance: $balance XLM"
-                    }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(this@FindEscrowActivity, "Account not found or invalid.", Toast.LENGTH_SHORT).show()
+                override fun onResponse(
+                    call: Call,
+                    response: Response,
+                ) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body?.string()
+                        val balance = parseBalance(responseBody)
+                        runOnUiThread {
+                            balanceTextView.visibility = View.VISIBLE
+                            balanceTextView.text = "Balance: $balance XLM"
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(this@FindEscrowActivity, "Account not found or invalid.", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
-            }
-        })
+            },
+        )
     }
 
     private fun parseBalance(response: String?): String {
@@ -198,9 +217,10 @@ class FindEscrowActivity : AppCompatActivity() {
             }
 
             // Mostrar diálogo para ingresar la clave privada
-            val privateKeyInput = EditText(this).apply {
-                hint = "Enter Private Key"
-            }
+            val privateKeyInput =
+                EditText(this).apply {
+                    hint = "Enter Private Key"
+                }
 
             AlertDialog.Builder(this)
                 .setTitle("Sign Transaction")
@@ -220,7 +240,10 @@ class FindEscrowActivity : AppCompatActivity() {
         }
     }
 
-    private fun signAndSendTransaction(privateKey: String, publicKey: String) {
+    private fun signAndSendTransaction(
+        privateKey: String,
+        publicKey: String,
+    ) {
         try {
             // Conectar al servidor de Horizon (Testnet)
             val server = Server("https://horizon-testnet.stellar.org")
@@ -229,17 +252,18 @@ class FindEscrowActivity : AppCompatActivity() {
             val sourceAccount = server.accounts().account(publicKey)
 
             // Crear la transacción
-            val transaction = Transaction.Builder(sourceAccount, Network.TESTNET)
-                .addOperation(
-                    PaymentOperation.Builder(
-                        "GCDXSOPD5T5MCGCPPRV3CWMYLTTWASVZBF4HZBNES6PGK7YRATM27NB4", // Cambia esto por la clave pública de destino
-                        AssetTypeNative(),
-                        "1000" // Cantidad a enviar (en XLM)
-                    ).build()
-                )
-                .setTimeout((System.currentTimeMillis() / 1000) + 300) // Configura un timeout de 5 minutos desde ahora
-                .setBaseFee(Transaction.MIN_BASE_FEE.toLong())
-                .build()
+            val transaction =
+                Transaction.Builder(sourceAccount, Network.TESTNET)
+                    .addOperation(
+                        PaymentOperation.Builder(
+                            "GCDXSOPD5T5MCGCPPRV3CWMYLTTWASVZBF4HZBNES6PGK7YRATM27NB4", // Cambia esto por la clave pública de destino
+                            AssetTypeNative(),
+                            "1000", // Cantidad a enviar (en XLM)
+                        ).build(),
+                    )
+                    .setTimeout((System.currentTimeMillis() / 1000) + 300) // Configura un timeout de 5 minutos desde ahora
+                    .setBaseFee(Transaction.MIN_BASE_FEE.toLong())
+                    .build()
 
             // Firmar la transacción con la clave privada proporcionada
             val keyPair = KeyPair.fromSecretSeed(privateKey)
@@ -265,5 +289,4 @@ class FindEscrowActivity : AppCompatActivity() {
             }
         }
     }
-
 }

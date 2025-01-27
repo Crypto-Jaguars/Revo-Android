@@ -13,7 +13,6 @@ import okhttp3.*
 import java.io.IOException
 
 class EscrowApproverActivity : AppCompatActivity() {
-
     private lateinit var connectButton: Button
     private lateinit var validateKeyButton: Button
     private lateinit var publicKeyInput: TextInputEditText
@@ -27,15 +26,27 @@ class EscrowApproverActivity : AppCompatActivity() {
         validateKeyButton = findViewById(R.id.validatePublicKeyButton)
         publicKeyInput = findViewById(R.id.publicKeyInput)
 
-        publicKeyInput.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                validateKeyButton.isEnabled = !s.isNullOrEmpty()
-            }
+        publicKeyInput.addTextChangedListener(
+            object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    validateKeyButton.isEnabled = !s.isNullOrEmpty()
+                }
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int,
+                ) {}
 
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int,
+                ) {}
+            },
+        )
 
         connectButton.setOnClickListener {
             showWalletSelectionDialog()
@@ -67,43 +78,47 @@ class EscrowApproverActivity : AppCompatActivity() {
     }
 
     private fun showWalletSelectionDialog() {
-        val walletSelectionDialog = WalletSelection { walletName ->
-            Toast.makeText(this, "Selected wallet: $walletName", Toast.LENGTH_SHORT).show()
-            if (walletName == "LOBSTR") {
-                // If LOBSTR is selected, it is automatically redirected from WalletSelection
+        val walletSelectionDialog =
+            WalletSelection { walletName ->
+                Toast.makeText(this, "Selected wallet: $walletName", Toast.LENGTH_SHORT).show()
+                if (walletName == "LOBSTR") {
+                    // If LOBSTR is selected, it is automatically redirected from WalletSelection
+                }
             }
-        }
         walletSelectionDialog.show(supportFragmentManager, "WalletSelection")
     }
-
-
-
-
-
 
     private fun validatePublicKey(publicKey: String) {
         val url = "https://horizon-testnet.stellar.org/accounts/$publicKey"
         val client = OkHttpClient()
         val request = Request.Builder().url(url).build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(this@EscrowApproverActivity, "Error verifying the password.", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                runOnUiThread {
-                    if (response.isSuccessful) {
-                        savePublicKey(publicKey)
-                        navigateToFindEscrow(publicKey)
-                    } else {
-                        Toast.makeText(this@EscrowApproverActivity, "Invalid public key.", Toast.LENGTH_SHORT).show()
+        client.newCall(request).enqueue(
+            object : Callback {
+                override fun onFailure(
+                    call: Call,
+                    e: IOException,
+                ) {
+                    runOnUiThread {
+                        Toast.makeText(this@EscrowApproverActivity, "Error verifying the password.", Toast.LENGTH_SHORT).show()
                     }
                 }
-            }
-        })
+
+                override fun onResponse(
+                    call: Call,
+                    response: Response,
+                ) {
+                    runOnUiThread {
+                        if (response.isSuccessful) {
+                            savePublicKey(publicKey)
+                            navigateToFindEscrow(publicKey)
+                        } else {
+                            Toast.makeText(this@EscrowApproverActivity, "Invalid public key.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            },
+        )
     }
 
     private fun savePublicKey(publicKey: String) {

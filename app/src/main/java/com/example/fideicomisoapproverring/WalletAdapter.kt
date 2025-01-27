@@ -9,20 +9,25 @@ import androidx.recyclerview.widget.RecyclerView
 
 class WalletAdapter(
     private val walletOptions: List<WalletSelection.WalletOption>,
-    private val onWalletSelected: (WalletSelection.WalletOption) -> Unit
+    private val onWalletSelected: (WalletSelection.WalletOption) -> Unit,
 ) : RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
-
     class WalletViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val walletName: TextView = itemView.findViewById(R.id.walletName)
         val walletStatus: TextView = itemView.findViewById(R.id.walletStatus)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WalletViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): WalletViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.activity_wallet_item, parent, false)
         return WalletViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: WalletViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: WalletViewHolder,
+        position: Int,
+    ) {
         val wallet = walletOptions[position]
         holder.walletName.text = wallet.name
         holder.walletStatus.text = if (wallet.isAvailable) "" else "Not available"
@@ -30,8 +35,11 @@ class WalletAdapter(
 
         // Change color according to availability
         holder.walletName.setTextColor(
-            if (wallet.isAvailable) holder.itemView.context.getColor(android.R.color.white)
-            else holder.itemView.context.getColor(android.R.color.darker_gray)
+            if (wallet.isAvailable) {
+                holder.itemView.context.getColor(android.R.color.white)
+            } else {
+                holder.itemView.context.getColor(android.R.color.darker_gray)
+            },
         )
 
         holder.itemView.setOnClickListener { onWalletSelected(wallet) }

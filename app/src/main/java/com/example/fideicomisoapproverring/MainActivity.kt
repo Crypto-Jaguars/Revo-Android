@@ -13,7 +13,6 @@ import okhttp3.*
 import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var engadmentIdInput: EditText
     private lateinit var enterButton: Button
 
@@ -41,31 +40,40 @@ class MainActivity : AppCompatActivity() {
         val contractId = ""
         val url = "https://api.trustlesswork/escrow/get-escrow-by-engagement-id?engagementId=$engadmentId&contractId=$contractId/"
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(url)
-            .build()
+        val request =
+            Request.Builder()
+                .url(url)
+                .build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Error en la conexiÃ³n", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    val responseBody = response.body?.string()
+        client.newCall(request).enqueue(
+            object : Callback {
+                override fun onFailure(
+                    call: Call,
+                    e: IOException,
+                ) {
                     runOnUiThread {
-                        val intent = Intent(this@MainActivity, EngagementActivity::class.java)
-                        intent.putExtra("engagementData", responseBody)
-                        startActivity(intent)
-                    }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(this@MainActivity, "ID no encontrado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, "Error en la conexiÃ³n", Toast.LENGTH_SHORT).show()
                     }
                 }
-            }
-        })
+
+                override fun onResponse(
+                    call: Call,
+                    response: Response,
+                ) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body?.string()
+                        runOnUiThread {
+                            val intent = Intent(this@MainActivity, EngagementActivity::class.java)
+                            intent.putExtra("engagementData", responseBody)
+                            startActivity(intent)
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(this@MainActivity, "ID no encontrado", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            },
+        )
     }
 }

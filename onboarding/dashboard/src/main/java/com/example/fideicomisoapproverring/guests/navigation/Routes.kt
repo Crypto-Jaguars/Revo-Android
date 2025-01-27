@@ -9,5 +9,5 @@ enum class Routes(val value: String) {
     How("how_it_works"),
     FAQ("faq"),
     About("about_us"),
-    Activity("activity")
+    Activity("activity"),
 }

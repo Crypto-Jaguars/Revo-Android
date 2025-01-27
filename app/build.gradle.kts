@@ -26,7 +26,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
         getByName("debug") {
@@ -73,7 +73,6 @@ android {
     }
 }
 
-
 dependencies {
     implementation(projects.onboarding.dashboard)
     implementation(projects.theme)
@@ -91,7 +90,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.squareup.okhttp)
     implementation(libs.json)
-
 
     implementation(libs.material)
     implementation(libs.androidx.material3)
@@ -114,7 +112,6 @@ dependencies {
 
     implementation(libs.github.ringofringssdk)
 
-
     // Testing Dependencies
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
@@ -129,7 +126,7 @@ dependencies {
     testImplementation(libs.squareup.okhttp)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.appcompat)
-    
+
     // Android Testing
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
