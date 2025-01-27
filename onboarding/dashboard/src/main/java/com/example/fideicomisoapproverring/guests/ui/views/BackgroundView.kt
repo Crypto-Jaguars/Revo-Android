@@ -1,4 +1,4 @@
-package com.example.fideicomisoapproverring.guests.ui
+package com.example.fideicomisoapproverring.guests.ui.views
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -14,8 +14,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.example.fideicomisoapproverring.dashboard.R
 import com.example.fideicomisoapproverring.theme.ui.theme.RingCoreTheme
-import com.example.fideicomisoapproverring.guests.R
 
 @Composable
 fun BackgroundView() {

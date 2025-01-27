@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.fideicomisoapproverring.guests"
+    namespace = "com.example.fideicomisoapproverring.dashboard"
     compileSdk = 35
 
     defaultConfig {
@@ -52,6 +52,8 @@ dependencies {
     implementation(libs.androidx.ui.compose.constraintlayout)
     // Optional - Integration with ViewModels
     implementation(libs.androidx.ui.viewmodel)
+    // Navigation
+    implementation(libs.androidx.ui.compose.navigation)
     // UI Tests
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)

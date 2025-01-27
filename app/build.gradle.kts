@@ -75,7 +75,7 @@ android {
 
 
 dependencies {
-    implementation(projects.onboarding.guests)
+    implementation(projects.onboarding.dashboard)
     implementation(projects.theme)
     implementation(libs.androidx.multidex)
     implementation(libs.retrofit)

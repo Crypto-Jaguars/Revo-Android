@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dashboard Home -->
+    <string name="label_home">Home</string>
+    <string name="label_search">Search</string>
+    <string name="label_categories">Categories</string>
+    <string name="label_settings">Settings</string>
+    <string name="label_connect_wallet">Connect Wallet</string>
+    <string name="label_how_it_works">How it works</string>
+    <string name="label_faq_help_centre">FAQ/Help Centre</string>
+    <string name="label_about_us">About Us</string>
+    <string name="title_greeting_prefix">Hi, %1$s</string>
+    <string name="title_guest">Guest</string>
+    <string name="currency_symbol_usd">\u0024%1$s</string>
+    <string name="label_market_cap">Market Cap</string>
+    <string name="label_volume_24hours">24h Volume</string>
+    <string name="label_active_traders">Active Traders</string>
+    <string name="title_personalized_experience">Personalized Experience</string>
+    <string name="msg_wallet_authentication">Connect you wallet to get tailored recommendations and stay updated.</string>
+    <string name="label_unit_prefix">per/%1$s</string>
+
+</resources>

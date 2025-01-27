@@ -22,6 +22,7 @@ appcompat = "1.7.0"
 googleFonts = "1.7.6"
 material = "1.12.0"
 activity = "1.10.0"
+navigation = "2.8.5"
 mockitoCore = "5.12.0"
 mockitoKotlin = "5.3.1"
 multidex = "2.0.1"
@@ -63,6 +64,7 @@ androidx-ui-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmo
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-ui-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation"}
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlinTestJunit" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }

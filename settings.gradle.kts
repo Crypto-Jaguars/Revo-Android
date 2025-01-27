@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "FideicomisoApproverRing"
-include(":app", ":onboarding:guests", ":theme")
+include(":app", ":onboarding:dashboard", ":theme")
