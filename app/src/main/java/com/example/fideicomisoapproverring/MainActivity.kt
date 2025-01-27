@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import com.example.fideicomisoapproverring.guests.ui.views.DashboardView
 import okhttp3.*
 import java.io.IOException
 
@@ -17,9 +19,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContent {
+            DashboardView()
+        }
 
-        engadmentIdInput = findViewById(R.id.engagementIdInput)
+        /*engadmentIdInput = findViewById(R.id.engagementIdInput)
         enterButton = findViewById(R.id.enterButton)
 
         enterButton.setOnClickListener {
@@ -30,7 +34,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Por favor ingresa un Engadment ID", Toast.LENGTH_SHORT).show()
             }
-        }
+        }*/
     }
 
     private fun fetchEngagementData(engadmentId: String) {

@@ -45,9 +45,9 @@ fun BackgroundView() {
                 modifier = Modifier.constrainAs(rightEllipseConstraint) {
                     top.linkTo(topRightEllipseConstraint.bottom)
                     end.linkTo(parent.end)
-                }.offset(x = 44.dp, y = (-36).dp)
-                .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment(MaterialTheme.shapes.medium)),
-                painter = painterResource(id = R.drawable.img_purple_ellipse),
+                }.offset(x = 88.dp)
+                .blur(radius = 48.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+                painter = painterResource(id = R.drawable.img_blue_ellipsis),
                 contentDescription = null,
             )
 
@@ -55,9 +55,9 @@ fun BackgroundView() {
                 modifier = Modifier.constrainAs(leftEllipseConstraint) {
                     top.linkTo(topRightEllipseConstraint.bottom, margin = 48.dp)
                     start.linkTo(parent.start)
-                }.offset(x = (-44).dp)
-                    .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment(MaterialTheme.shapes.medium)),
-                painter = painterResource(id = R.drawable.img_purple_ellipse),
+                }.offset(x = (-88).dp)
+                    .blur(radius = 48.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+                painter = painterResource(id = R.drawable.img_blue_ellipsis),
                 contentDescription = null,
             )
         }

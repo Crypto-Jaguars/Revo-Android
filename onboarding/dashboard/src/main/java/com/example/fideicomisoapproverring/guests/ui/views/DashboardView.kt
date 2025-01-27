@@ -3,6 +3,7 @@ package com.example.fideicomisoapproverring.guests.ui.views
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -46,7 +49,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -55,10 +57,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.fideicomisoapproverring.dashboard.R
 import com.example.fideicomisoapproverring.guests.model.AgriculturalProduct
-import com.example.fideicomisoapproverring.guests.model.DrawerMenu
+import com.example.fideicomisoapproverring.guests.model.BottomNavigationItem
+import com.example.fideicomisoapproverring.guests.model.NavigationDrawerMenuItem
 import com.example.fideicomisoapproverring.theme.icons.RingCore
+import com.example.fideicomisoapproverring.theme.icons.ringcore.IcArrowTopRight
 import com.example.fideicomisoapproverring.theme.icons.ringcore.IcUpwardTrend
 import com.example.fideicomisoapproverring.theme.ui.theme.RingCoreTheme
 import kotlinx.coroutines.launch
@@ -67,6 +76,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardView(
+    navController: NavController = rememberNavController(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     onMenuClick: (String) -> Unit = {}
 ) {
@@ -79,7 +89,7 @@ fun DashboardView(
                 drawerShape = MaterialTheme.shapes.small,
             ) {
                 ModalDrawerContentView(
-                    menus = DrawerMenu.defaultMenus,
+                    menus = NavigationDrawerMenuItem.defaultMenus,
                     onMenuClick = onMenuClick
                 )
             }
@@ -113,8 +123,54 @@ fun DashboardView(
                                 )
                             }
                         },
-                        title = { Text(text = stringResource(R.string.title_greeting_prefix, stringResource(R.string.title_guest))) }
+                        title = {
+                            Text(
+                                text = stringResource(
+                                    R.string.title_greeting_prefix,
+                                    stringResource(R.string.title_guest)
+                                )
+                            )
+                        }
                     )
+                },
+                bottomBar = {
+                    NavigationBar {
+                        val navBackStackEntry = navController.currentBackStackEntryAsState()
+                        val currentDestination = navBackStackEntry.value?.destination
+                        BottomNavigationItem.values().forEach { item ->
+                            NavigationBarItem(
+                                icon = {
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        imageVector = item.icon,
+                                        contentDescription = stringResource(item.label),
+                                    )
+                                },
+                                label = { Text(text = stringResource(item.label)) },
+                                selected = currentDestination?.hierarchy?.any {
+                                    it.hasRoute(
+                                        item.route,
+                                        null
+                                    )
+                                } == true,
+                                onClick = {
+                                    navController.navigate(item.route) {
+                                        // Pop up to the start destination of the graph to
+                                        // avoid building up a large stack of destinations
+                                        // on the back stack as users select items
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        // Avoid multiple copies of the same destination when
+                                        // reselecting the same item
+                                        launchSingleTop = true
+                                        // Restore state when reselecting a previously selected item
+                                        restoreState = true
+                                    }
+                                }
+                            )
+                        }
+                    }
                 },
                 containerColor = Color.Transparent
             ) { contentPadding ->
@@ -134,7 +190,7 @@ fun DashboardView(
 
 @Composable
 fun ModalDrawerContentView(
-    menus: Array<DrawerMenu>,
+    menus: Array<NavigationDrawerMenuItem>,
     onMenuClick: (String) -> Unit = {}
 ) {
     Column(
@@ -283,7 +339,6 @@ fun AuthenticateWalletCardView(
                         color = Color(0xFFA896FE)
                     ),
                     // color = MaterialTheme.colorScheme.primary
-
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -318,30 +373,62 @@ fun AuthenticateWalletCardView(
 @Composable
 fun TrendingProductsView(
     modifier: Modifier = Modifier,
-    products: Array<AgriculturalProduct> = AgriculturalProduct.defaultItems
+    products: Array<AgriculturalProduct> = AgriculturalProduct.defaultItems,
+    onViewAllProducts: () -> Unit = {},
 ) {
-    Column(
-        modifier = modifier.background(
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors().copy(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
                 alpha = 0.1F
-            ),
-            shape = MaterialTheme.shapes.medium
-        ).padding(horizontal = 24.dp, vertical = 16.dp)
-            .clip(shape = MaterialTheme.shapes.medium)
-            .shadow(elevation = 8.dp, shape = MaterialTheme.shapes.medium)
+            )
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
+        )
     ) {
-        products.forEach {
+        Column(
+            modifier = modifier
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+        ) {
+            products.forEach {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TrendingProductItemView(modifier = modifier, product = it)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            TrendingProductItemView(modifier = modifier, product = it)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onViewAllProducts),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = stringResource(R.string.action_view_all),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outline
-            )
+                Icon(
+                    imageVector = RingCore.IcArrowTopRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
+
 }
 
 @Composable
@@ -367,7 +454,10 @@ fun TrendingProductItemView(
             horizontalAlignment = Alignment.End
         ) {
             Text(
-                text = stringResource(R.string.currency_symbol_usd, String.format(Locale.getDefault(), "%.2f", product.price)),
+                text = stringResource(
+                    R.string.currency_symbol_usd,
+                    String.format(Locale.getDefault(), "%.2f", product.price)
+                ),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -385,6 +475,72 @@ fun TrendingProductItemView(
     }
 }
 
+@Composable
+fun HeadlineBannerView(
+    modifier: Modifier = Modifier,
+    onAuthenticate: () -> Unit = {},
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors().copy(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = 0.1F
+            )
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.title_welcome_msg),
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(R.string.msg_wallet_connection_perks),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = onAuthenticate,
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(
+                    text = stringResource(R.string.label_connect_wallet),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun HeadlineBannerPreview() {
+    RingCoreTheme(
+        darkTheme = true,
+    ) {
+        HeadlineBannerView()
+    }
+}
+
 @Preview
 @Composable
 private fun TrendingProductItemPreview() {
@@ -392,7 +548,11 @@ private fun TrendingProductItemPreview() {
         darkTheme = true,
     ) {
         TrendingProductItemView(
-            product = AgriculturalProduct(drawableRes = R.drawable.img_corn, price = 2890.00F, unit = "kg"),
+            product = AgriculturalProduct(
+                drawableRes = R.drawable.img_corn,
+                price = 2890.00F,
+                unit = "kg"
+            ),
         )
     }
 }
@@ -440,7 +600,7 @@ private fun ModalDrawerContentPreview() {
     RingCoreTheme(
         darkTheme = true
     ) {
-        ModalDrawerContentView(menus = DrawerMenu.defaultMenus)
+        ModalDrawerContentView(menus = NavigationDrawerMenuItem.defaultMenus)
     }
 
 }
