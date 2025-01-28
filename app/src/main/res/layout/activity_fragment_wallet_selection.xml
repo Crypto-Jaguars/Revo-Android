@@ -7,19 +7,30 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Bottom Sheet Title -->
+    <!-- Título del Bottom Sheet -->
     <TextView
         android:id="@+id/titleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Select a Wallet"
-        android:textSize="18sp"
-        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-medium"
         android:paddingBottom="8dp" />
 
-    <!-- Wallet list -->
+    <!-- Indicador visual para el estado -->
+    <View
+        android:id="@+id/statusIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/blue"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Lista de wallets -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/walletList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp" />
+
 </LinearLayout>
