@@ -1,5 +1,6 @@
 package com.example.fideicomisoapproverring.guests.ui.views
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,11 +17,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,14 +38,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,20 +74,27 @@ import com.example.fideicomisoapproverring.dashboard.R
 import com.example.fideicomisoapproverring.guests.model.AgriculturalProduct
 import com.example.fideicomisoapproverring.guests.model.BottomNavigationItem
 import com.example.fideicomisoapproverring.guests.model.NavigationDrawerMenuItem
+import com.example.fideicomisoapproverring.guests.navigation.Routes
 import com.example.fideicomisoapproverring.theme.icons.RingCore
 import com.example.fideicomisoapproverring.theme.icons.ringcore.IcArrowTopRight
 import com.example.fideicomisoapproverring.theme.icons.ringcore.IcUpwardTrend
+import com.example.fideicomisoapproverring.theme.icons.ringcore.IcWallet
 import com.example.fideicomisoapproverring.theme.ui.theme.RingCoreTheme
 import kotlinx.coroutines.launch
 import java.util.Locale
 
+@SuppressLint("RestrictedApi")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardView(
     navController: NavController = rememberNavController(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
+    onViewAllProducts: () -> Unit = {},
+    onAuthenticate: () -> Unit = {},
     onMenuClick: (String) -> Unit = {},
 ) {
+    var openAlertDialog = remember { mutableStateOf(false) }
+
     val coroutineScope = rememberCoroutineScope()
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -101,13 +116,13 @@ fun DashboardView(
                 topBar = {
                     TopAppBar(
                         colors =
-                            TopAppBarDefaults.topAppBarColors(
-                                containerColor =
-                                    MaterialTheme.colorScheme.primaryContainer.copy(
-                                        alpha = 0.1F,
-                                    ),
-                                titleContentColor = MaterialTheme.colorScheme.onBackground,
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor =
+                            MaterialTheme.colorScheme.primaryContainer.copy(
+                                alpha = 0.1F,
                             ),
+                            titleContentColor = MaterialTheme.colorScheme.onBackground,
+                        ),
                         navigationIcon = {
                             IconButton(onClick = {
                                 coroutineScope.launch {
@@ -127,17 +142,16 @@ fun DashboardView(
                         },
                         title = {
                             Text(
-                                text =
-                                    stringResource(
-                                        R.string.title_greeting_prefix,
-                                        stringResource(R.string.title_guest),
-                                    ),
+                                text = stringResource(R.string.title_market_place),
+                                fontWeight = FontWeight.Bold
                             )
                         },
                     )
                 },
                 bottomBar = {
-                    NavigationBar {
+                    NavigationBar(
+                        containerColor = NavigationBarDefaults.containerColor.copy(alpha = 0.25F)
+                    ) {
                         val navBackStackEntry = navController.currentBackStackEntryAsState()
                         val currentDestination = navBackStackEntry.value?.destination
                         BottomNavigationItem.values().forEach { item ->
@@ -151,26 +165,32 @@ fun DashboardView(
                                 },
                                 label = { Text(text = stringResource(item.label)) },
                                 selected =
-                                    currentDestination?.hierarchy?.any {
-                                        it.hasRoute(
-                                            item.route,
-                                            null,
-                                        )
-                                    } == true,
+                                currentDestination?.hierarchy?.any {
+                                    it.hasRoute(
+                                        item.route,
+                                        null,
+                                    )
+                                } == true,
                                 onClick = {
-                                    navController.navigate(item.route) {
-                                        // Pop up to the start destination of the graph to
-                                        // avoid building up a large stack of destinations
-                                        // on the back stack as users select items
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
+                                    // TODO: Remove conditional clause when stubbed screens have been built
+                                    if (item.route != Routes.Home.value) {
+                                        openAlertDialog.value = true
+                                    } else {
+                                        navController.navigate(item.route) {
+                                            // Pop up to the start destination of the graph to
+                                            // avoid building up a large stack of destinations
+                                            // on the back stack as users select items
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            // Avoid multiple copies of the same destination when
+                                            // re-selecting the same item
+                                            launchSingleTop = true
+                                            // Restore state when re-selecting a previously selected item
+                                            restoreState = true
                                         }
-                                        // Avoid multiple copies of the same destination when
-                                        // reselecting the same item
-                                        launchSingleTop = true
-                                        // Restore state when reselecting a previously selected item
-                                        restoreState = true
                                     }
+
                                 },
                             )
                         }
@@ -180,12 +200,67 @@ fun DashboardView(
             ) { contentPadding ->
                 Column(
                     modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(contentPadding)
-                            .verticalScroll(state = rememberScrollState()),
+                    Modifier
+                        .wrapContentHeight()
+                        .padding(contentPadding)
+                        .padding(horizontal = 8.dp)
+                        .verticalScroll(state = rememberScrollState()),
                 ) {
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    HeadlineBannerView(onAuthenticate = onAuthenticate)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    TradeStatisticCardView(
+                        icon = RingCore.IcUpwardTrend,
+                        label = stringResource(R.string.label_market_cap),
+                        value = stringResource(R.string.currency_symbol_usd, String.format(Locale.getDefault(), "%.2f", 1820F))
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    TradeStatisticCardView(
+                        icon = RingCore.IcWallet,
+                        label = stringResource(R.string.label_volume_24hours),
+                        value = stringResource(R.string.currency_symbol_usd, String.format(Locale.getDefault(), "%.2f", 82000F))
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    TradeStatisticCardView(
+                        icon = RingCore.IcWallet,
+                        label = stringResource(R.string.label_active_traders),
+                        value = stringResource(R.string.currency_symbol_usd, String.format(Locale.getDefault(), "%.2f", 2400000F))
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    AuthenticateWalletCardView(onAuthenticate = onAuthenticate)
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Text(
+                        text = stringResource(R.string.title_trending_products),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    TrendingProductsView(onViewAllProducts = onViewAllProducts)
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
+            }
+
+            if (openAlertDialog.value) {
+                ConnectWalletDialog(
+                    onDismiss = { openAlertDialog.value = false },
+                    onConfirm = { openAlertDialog.value = false }
+                )
             }
         }
     }
@@ -198,9 +273,9 @@ fun ModalDrawerContentView(
 ) {
     Column(
         modifier =
-            Modifier
-                .wrapContentSize()
-                .clip(shape = MaterialTheme.shapes.large),
+        Modifier
+            .wrapContentSize()
+            .clip(shape = MaterialTheme.shapes.large),
     ) {
         menus.forEach {
             if (it.title == R.string.label_connect_wallet) {
@@ -235,22 +310,22 @@ fun TradeStatisticCardView(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         colors =
-            CardDefaults.cardColors().copy(
-                containerColor =
-                    MaterialTheme.colorScheme.surfaceVariant.copy(
-                        alpha = 0.1F,
-                    ),
+        CardDefaults.cardColors().copy(
+            containerColor =
+            MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = 0.1F,
             ),
+        ),
         elevation =
-            CardDefaults.cardElevation(
-                defaultElevation = 8.dp,
-            ),
+        CardDefaults.cardElevation(
+            defaultElevation = 8.dp,
+        ),
     ) {
         Column(
             modifier =
-                Modifier
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .background(color = Color.Transparent),
+            Modifier
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .background(color = Color.Transparent),
         ) {
             Row(
                 modifier = Modifier.background(color = Color.Transparent),
@@ -272,9 +347,9 @@ fun TradeStatisticCardView(
             Text(
                 text = value,
                 style =
-                    MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                    ),
+                MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                ),
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
@@ -290,70 +365,70 @@ fun AuthenticateWalletCardView(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         colors =
-            CardDefaults.cardColors().copy(
-                containerColor =
-                    MaterialTheme.colorScheme.surfaceVariant.copy(
-                        alpha = 0.26F,
-                    ),
+        CardDefaults.cardColors().copy(
+            containerColor =
+            MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = 0.26F,
             ),
+        ),
         elevation =
-            CardDefaults.cardElevation(
-                defaultElevation = 8.dp,
-            ),
+        CardDefaults.cardElevation(
+            defaultElevation = 8.dp,
+        ),
     ) {
         ConstraintLayout(
             modifier =
-                Modifier
-                    .wrapContentSize(),
+            Modifier
+                .wrapContentSize(),
         ) {
             val (topLeftEllipsisConstraint, bottomRightEllipsisConstraint, contentConstraint) = createRefs()
 
             Image(
                 modifier =
-                    Modifier
-                        .constrainAs(topLeftEllipsisConstraint) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                        }
-                        .offset(x = (-36).dp, y = (-36).dp)
-                        .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+                Modifier
+                    .constrainAs(topLeftEllipsisConstraint) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                    }
+                    .offset(x = (-36).dp, y = (-36).dp)
+                    .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
                 painter = painterResource(R.drawable.img_purple_ellipse),
                 contentDescription = null,
             )
 
             Image(
                 modifier =
-                    Modifier
-                        .constrainAs(bottomRightEllipsisConstraint) {
-                            bottom.linkTo(parent.bottom)
-                            end.linkTo(parent.end)
-                        }
-                        .offset(x = (36).dp, y = (36).dp)
-                        .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+                Modifier
+                    .constrainAs(bottomRightEllipsisConstraint) {
+                        bottom.linkTo(parent.bottom)
+                        end.linkTo(parent.end)
+                    }
+                    .offset(x = (36).dp, y = (36).dp)
+                    .blur(radius = 28.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
                 painter = painterResource(R.drawable.img_purple_ellipse),
                 contentDescription = null,
             )
 
             Column(
                 modifier =
-                    Modifier
-                        .constrainAs(contentConstraint) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
-                        .wrapContentSize()
-                        .padding(horizontal = 16.dp, vertical = 24.dp)
-                        .background(color = Color.Transparent),
+                Modifier
+                    .constrainAs(contentConstraint) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                    .wrapContentSize()
+                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                    .background(color = Color.Transparent),
             ) {
                 Text(
                     text = stringResource(R.string.title_personalized_experience),
                     style =
-                        MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFA896FE),
-                        ),
+                    MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFA896FE),
+                    ),
                     // color = MaterialTheme.colorScheme.primary
                 )
 
@@ -369,12 +444,12 @@ fun AuthenticateWalletCardView(
 
                 Button(
                     onClick = onAuthenticate,
-                    shape = MaterialTheme.shapes.medium,
+                    shape = MaterialTheme.shapes.small,
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                        ),
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFDDD6FF),
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
                 ) {
                     Text(
                         text = stringResource(R.string.label_connect_wallet),
@@ -388,7 +463,12 @@ fun AuthenticateWalletCardView(
 
 @Composable
 fun TrendingProductsView(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
+        .background(
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = 0.1F,
+            )
+        ),
     products: Array<AgriculturalProduct> = AgriculturalProduct.defaultItems,
     onViewAllProducts: () -> Unit = {},
 ) {
@@ -396,21 +476,21 @@ fun TrendingProductsView(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         colors =
-            CardDefaults.cardColors().copy(
-                containerColor =
-                    MaterialTheme.colorScheme.surfaceVariant.copy(
-                        alpha = 0.1F,
-                    ),
+        CardDefaults.cardColors().copy(
+            containerColor =
+            MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = 0.1F,
             ),
+        ),
         elevation =
-            CardDefaults.cardElevation(
-                defaultElevation = 8.dp,
-            ),
+        CardDefaults.cardElevation(
+            defaultElevation = 8.dp,
+        ),
     ) {
         Column(
             modifier =
-                modifier
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+            modifier
+                .padding(horizontal = 24.dp, vertical = 16.dp),
         ) {
             products.forEach {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -428,9 +508,9 @@ fun TrendingProductsView(
 
             Row(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onViewAllProducts),
+                modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onViewAllProducts),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Text(
@@ -453,7 +533,7 @@ fun TrendingProductsView(
 
 @Composable
 fun TrendingProductItemView(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.background(Color.Transparent),
     product: AgriculturalProduct,
 ) {
     Row(
@@ -475,14 +555,14 @@ fun TrendingProductItemView(
         ) {
             Text(
                 text =
-                    stringResource(
-                        R.string.currency_symbol_usd,
-                        String.format(Locale.getDefault(), "%.2f", product.price),
-                    ),
+                stringResource(
+                    R.string.currency_symbol_usd,
+                    String.format(Locale.getDefault(), "%.2f", product.price),
+                ),
                 style =
-                    MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                    ),
+                MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                ),
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
@@ -499,35 +579,29 @@ fun TrendingProductItemView(
 
 @Composable
 fun HeadlineBannerView(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.background(
+        Color.Transparent
+    ),
     onAuthenticate: () -> Unit = {},
 ) {
-    Card(
-        modifier =
-            modifier
-                .fillMaxWidth(),
+    Surface(
+        modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        colors =
-            CardDefaults.cardColors().copy(
-                containerColor =
-                    MaterialTheme.colorScheme.surfaceVariant.copy(
-                        alpha = 0.1F,
-                    ),
-            ),
-        elevation =
-            CardDefaults.cardElevation(
-                defaultElevation = 8.dp,
-            ),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(
+            alpha = 0.1F,
+        ),
+        tonalElevation = 8.dp,
+        shadowElevation = 8.dp,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp),
+            modifier = modifier.padding(horizontal = 24.dp, vertical = 32.dp),
         ) {
             Text(
                 text = stringResource(R.string.title_welcome_msg),
                 style =
-                    MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                    ),
+                MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                ),
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
@@ -543,12 +617,12 @@ fun HeadlineBannerView(
 
             Button(
                 onClick = onAuthenticate,
-                shape = MaterialTheme.shapes.medium,
+                shape = MaterialTheme.shapes.small,
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                    ),
+                ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFDDD6FF),
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
             ) {
                 Text(
                     text = stringResource(R.string.label_connect_wallet),
@@ -557,6 +631,52 @@ fun HeadlineBannerView(
             }
         }
     }
+}
+
+@Composable
+fun ConnectWalletDialog(
+    onDismiss: () -> Unit = {},
+    onConfirm: () -> Unit = {},
+) {
+    AlertDialog(
+        icon = {
+            Icon(imageVector = RingCore.IcWallet, contentDescription = stringResource(R.string.label_connect_wallet))
+        },
+        title = {
+            Text(
+                text = "Connect wallet to continue",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        },
+        text = {
+            Column{
+                Text(text = stringResource(R.string.dialog_msg_secure_transaction))
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(text = stringResource(R.string.dialog_msg_track_purchase))
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(text = stringResource(R.string.dialog_msg_unlock_features))
+            }
+
+        },
+
+        onDismissRequest =  onDismiss,
+        confirmButton = {
+            TextButton(onClick = { onConfirm() }) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismiss() }) {
+                Text("Dismiss")
+            }
+        }
+    )
 }
 
 @Preview
@@ -577,11 +697,11 @@ private fun TrendingProductItemPreview() {
     ) {
         TrendingProductItemView(
             product =
-                AgriculturalProduct(
-                    drawableRes = R.drawable.img_corn,
-                    price = 2890.00F,
-                    unit = "kg",
-                ),
+            AgriculturalProduct(
+                drawableRes = R.drawable.img_corn,
+                price = 2890.00F,
+                unit = "kg",
+            ),
         )
     }
 }

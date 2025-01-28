@@ -10,8 +10,7 @@
     <string name="label_how_it_works">How it works</string>
     <string name="label_faq_help_centre">FAQ/Help Centre</string>
     <string name="label_about_us">About Us</string>
-    <string name="title_greeting_prefix">Hi, %1$s</string>
-    <string name="title_guest">Guest</string>
+    <string name="title_market_place">Market place</string>
     <string name="currency_symbol_usd">\u0024%1$s</string>
     <string name="label_market_cap">Market Cap</string>
     <string name="label_volume_24hours">24h Volume</string>
@@ -23,5 +22,9 @@
     <string name="title_welcome_msg">Welcome to Ring Core</string>
     <string name="msg_wallet_connection_perks">Connect your wallet and have access to full browsing Capabilities, Search Function, and categories.</string>
     <string name="label_activity">Activity</string>
+    <string name="title_trending_products">Trending Agro-Products</string>
+    <string name="dialog_msg_secure_transaction">1. Secure and seamless transactions</string>
+    <string name="dialog_msg_track_purchase">2. Save favourites and track purchase</string>
+    <string name="dialog_msg_unlock_features">3. Unlock full marketplace features</string>
 
 </resources>

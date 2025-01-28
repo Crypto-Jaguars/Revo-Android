@@ -27,7 +27,7 @@ fun BackgroundView() {
                 Modifier.fillMaxSize()
                     .background(color = MaterialTheme.colorScheme.background),
         ) {
-            val (topRightEllipseConstraint, rightEllipseConstraint, leftEllipseConstraint) = createRefs()
+            val (topRightEllipseConstraint, rightEllipseConstraint, leftEllipseConstraint, bottomLeftEllipseConstraint) = createRefs()
 
             Image(
                 modifier =
@@ -61,6 +61,16 @@ fun BackgroundView() {
                         start.linkTo(parent.start)
                     }.offset(x = (-88).dp)
                         .blur(radius = 48.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+                painter = painterResource(id = R.drawable.img_blue_ellipsis),
+                contentDescription = null,
+            )
+
+            Image(
+                modifier =
+                Modifier.constrainAs(bottomLeftEllipseConstraint) {
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                }.blur(radius = 64.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
                 painter = painterResource(id = R.drawable.img_blue_ellipsis),
                 contentDescription = null,
             )
