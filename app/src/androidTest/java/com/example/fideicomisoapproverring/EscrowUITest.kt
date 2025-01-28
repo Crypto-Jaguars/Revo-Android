@@ -49,4 +49,4 @@ class EscrowUITest {
         onView(withId(R.id.resultFrame))
             .check(matches(isDisplayed()))
     }
-} 
+}

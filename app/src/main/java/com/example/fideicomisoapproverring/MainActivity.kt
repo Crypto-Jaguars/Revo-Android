@@ -12,7 +12,6 @@ import com.example.fideicomisoapproverring.guests.ui.views.DashboardView
 import com.example.fideicomisoapproverring.theme.ui.theme.RingCoreTheme
 
 class MainActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -21,26 +20,21 @@ class MainActivity : AppCompatActivity() {
             NavHost(navController = navController, startDestination = Routes.Home.value) {
                 composable(route = Routes.Home.value) {
                     RingCoreTheme(
-                        darkTheme = true
+                        darkTheme = true,
                     ) {
                         DashboardView(navController = navController)
                     }
                 }
 
                 composable(route = Routes.Wallet.value) {
-
                 }
 
                 composable(route = Routes.Activity.value) {
-
                 }
 
                 composable(route = Routes.Search.value) {
-
                 }
             }
-
         }
-
     }
 }

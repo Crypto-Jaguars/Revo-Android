@@ -67,10 +67,10 @@ fun BackgroundView() {
 
             Image(
                 modifier =
-                Modifier.constrainAs(bottomLeftEllipseConstraint) {
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                }.blur(radius = 64.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+                    Modifier.constrainAs(bottomLeftEllipseConstraint) {
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                    }.blur(radius = 64.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
                 painter = painterResource(id = R.drawable.img_blue_ellipsis),
                 contentDescription = null,
             )

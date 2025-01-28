@@ -57,4 +57,4 @@ class FindEscrowActivityTest {
             assertEquals(View.VISIBLE, activity.findViewById<LinearLayout>(R.id.loadingPanel).visibility)
         }
     }
-} 
+}
