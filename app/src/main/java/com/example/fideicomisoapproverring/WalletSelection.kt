@@ -6,14 +6,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSheetDialogFragment() {
-
-    data class WalletOption(val name: String, val isAvailable: Boolean)
+class WalletSelection(private val onWalletSelected: (String) -> Unit) :
+    BottomSheetDialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -21,17 +21,23 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSh
     ): View {
         val view = inflater.inflate(R.layout.activity_fragment_wallet_selection, container, false)
 
+        // Botón "View QR Code Instead"
+        val qrButton = view.findViewById<TextView>(R.id.viewQRText)
+        qrButton.setOnClickListener {
+            Toast.makeText(context, "QR Code feature coming soon!", Toast.LENGTH_SHORT).show()
+        }
+
+        // Configurar RecyclerView con la lista de wallets
         val walletList = view.findViewById<RecyclerView>(R.id.walletList)
         walletList.layoutManager = LinearLayoutManager(context)
 
-        // Lista de wallets disponibles
         val wallets = listOf(
-            WalletOption("xBull", true),
-            WalletOption("Albedo", true),
-            WalletOption("LOBSTR", true),
-            WalletOption("Freighter", false),
-            WalletOption("Rabet", false),
-            WalletOption("Hana Wallet", false)
+            WalletOption("xBull", R.drawable.xbulllogo, true),
+            WalletOption("Albedo", R.drawable.albedologo, true),
+            WalletOption("LOBSTR", R.drawable.lobstrlogo, true),
+            WalletOption("Freighter", R.drawable.freigtherlogo, false),
+            WalletOption("Rabet", R.drawable.rabetlogo, false),
+            WalletOption("Hana Wallet", R.drawable.hanalogo, false)
         )
 
         walletList.adapter = WalletAdapter(wallets) { wallet ->
@@ -42,7 +48,8 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSh
                 }
                 dismiss()
             } else {
-                Toast.makeText(context, "${wallet.name} is not yet available.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "${wallet.name} is not available.", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
@@ -59,7 +66,13 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSh
             val playStoreUri = "https://play.google.com/store/apps/details?id=com.lobstr.client"
             val fallbackIntent = Intent(Intent.ACTION_VIEW, Uri.parse(playStoreUri))
             startActivity(fallbackIntent)
-            Toast.makeText(context, "Please install Lobstr Wallet to continue.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Please install Lobstr Wallet to continue.", Toast.LENGTH_LONG)
+                .show()
         }
     }
+
+    // Definir la clase WalletOption para manejar cada wallet
+    data class WalletOption(val name: String, val iconRes: Int, val isAvailable: Boolean)
 }
+
+

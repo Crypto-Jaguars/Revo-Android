@@ -1,8 +1,11 @@
 package com.example.fideicomisoapproverring
 
+import ConnectingDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
@@ -17,6 +20,8 @@ class EscrowApproverActivity : AppCompatActivity() {
     private lateinit var connectButton: Button
     private lateinit var validateKeyButton: Button
     private lateinit var publicKeyInput: TextInputEditText
+    private lateinit var progressDialog: ConnectingDialog
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +31,8 @@ class EscrowApproverActivity : AppCompatActivity() {
         connectButton = findViewById(R.id.connectButton)
         validateKeyButton = findViewById(R.id.validatePublicKeyButton)
         publicKeyInput = findViewById(R.id.publicKeyInput)
+        progressDialog = ConnectingDialog(this)
+
 
         publicKeyInput.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -46,11 +53,13 @@ class EscrowApproverActivity : AppCompatActivity() {
         validateKeyButton.setOnClickListener {
             val publicKey = publicKeyInput.text.toString()
             if (publicKey.isNotEmpty()) {
+                progressDialog.show()
                 validatePublicKey(publicKey)
             } else {
                 Toast.makeText(this, "Please enter a public key.", Toast.LENGTH_SHORT).show()
             }
         }
+
     }
 
     private fun redirectToLobstrWallet() {
@@ -91,22 +100,32 @@ class EscrowApproverActivity : AppCompatActivity() {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
-                    Toast.makeText(this@EscrowApproverActivity, "Error verifying the password.", Toast.LENGTH_SHORT).show()
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        progressDialog.dismiss()
+                        Toast.makeText(this@EscrowApproverActivity, "Error verifying the key.", Toast.LENGTH_SHORT).show()
+                    }, 3000)
                 }
             }
 
             override fun onResponse(call: Call, response: Response) {
                 runOnUiThread {
-                    if (response.isSuccessful) {
-                        savePublicKey(publicKey)
-                        navigateToFindEscrow(publicKey)
-                    } else {
-                        Toast.makeText(this@EscrowApproverActivity, "Invalid public key.", Toast.LENGTH_SHORT).show()
-                    }
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        progressDialog.dismiss()
+                        if (response.isSuccessful) {
+                            savePublicKey(publicKey)
+                            navigateToFindEscrow(publicKey)
+                        } else {
+                            Toast.makeText(this@EscrowApproverActivity, "Invalid public key.", Toast.LENGTH_SHORT).show()
+                        }
+                    }, 3000)
                 }
             }
         })
     }
+
+
 
     private fun savePublicKey(publicKey: String) {
         val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)

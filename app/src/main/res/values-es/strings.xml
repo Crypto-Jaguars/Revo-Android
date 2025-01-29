@@ -3,4 +3,10 @@
     <string name="engagementId" translatable="false">ID Acuerdo</string>
     <string name="contractId" translatable="false">ID Contrato</string>
     <string name="enterButton" translatable="false">Entrar</string>
+    <string name="escrow_approver" translatable="false">Aprobar Escrow</string>
+    <string name="choose_your" translatable="false">Escoge tu</string>
+    <string name="view_qr_cod" translatable="false">Ver codigo QR</string>
+    <string name="wallet_icon_desc" translatable="false">Icono de Wallet</string>
+    <string name="arrow_icon_desc" translatable="false">Icono Flecha</string>
+
 </resources>
