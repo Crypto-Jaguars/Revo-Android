@@ -15,19 +15,21 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 class WalletSelection(private val onWalletSelected: (String) -> Unit) :
     BottomSheetDialogFragment() {
 
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.activity_fragment_wallet_selection, container, false)
 
-        // Botón "View QR Code Instead"
+
         val qrButton = view.findViewById<TextView>(R.id.viewQRText)
         qrButton.setOnClickListener {
             Toast.makeText(context, "QR Code feature coming soon!", Toast.LENGTH_SHORT).show()
         }
 
-        // Configurar RecyclerView con la lista de wallets
+
         val walletList = view.findViewById<RecyclerView>(R.id.walletList)
         walletList.layoutManager = LinearLayoutManager(context)
 
@@ -54,6 +56,8 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) :
         }
 
         return view
+
+
     }
 
     private fun redirectToLobstrWallet() {
@@ -71,7 +75,7 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) :
         }
     }
 
-    // Definir la clase WalletOption para manejar cada wallet
+
     data class WalletOption(val name: String, val iconRes: Int, val isAvailable: Boolean)
 }
 
