@@ -27,6 +27,8 @@ class EscrowApproverActivity : AppCompatActivity() {
     private lateinit var statusBanner: RelativeLayout
     private lateinit var statusIcon: ImageView
     private lateinit var statusText: TextView
+    private var savedPublicKey: String? = null
+
 
     private var connectionStatus: ConnectionStatus? = null
 
@@ -80,7 +82,8 @@ class EscrowApproverActivity : AppCompatActivity() {
                 runOnUiThread {
                     Handler(Looper.getMainLooper()).postDelayed({
                         progressDialog.dismiss()
-                        showStatusBanner(ConnectionStatus.ERROR, "") // ✅ Pasamos un string vacío
+                        showStatusBanner(ConnectionStatus.ERROR)
+
                     }, 3000)
                 }
             }
@@ -93,9 +96,12 @@ class EscrowApproverActivity : AppCompatActivity() {
 
                         if (response.isSuccessful && publicKeyValue.isNotEmpty()) {
                             savePublicKey(publicKeyValue)
+                            savedPublicKey = publicKeyValue
                             navigateToFindEscrow(publicKeyValue, ConnectionStatus.SUCCESS)
-                        } else {
-                            showStatusBanner(ConnectionStatus.ERROR, publicKeyValue) // ✅ Pasamos la publicKey si existe
+                        }
+                        else {
+                            showStatusBanner(ConnectionStatus.ERROR)
+
                         }
                     }, 3000)
                 }
@@ -114,8 +120,11 @@ class EscrowApproverActivity : AppCompatActivity() {
 
                 Handler(Looper.getMainLooper()).postDelayed({
                     statusBanner.visibility = View.GONE
-                    navigateToFindEscrow(status)
+                    savedPublicKey?.let {
+                        navigateToFindEscrow(it, ConnectionStatus.SUCCESS)
+                    }
                 }, 3000)
+
             }
             ConnectionStatus.WARNING -> {
                 statusBanner.setBackgroundResource(R.drawable.toast_warning)
@@ -129,10 +138,10 @@ class EscrowApproverActivity : AppCompatActivity() {
                 statusText.text = "Error: Unable to connect."
                 statusBanner.visibility = View.VISIBLE
 
-                // Ocultar error después de 5 segundos
+
                 Handler(Looper.getMainLooper()).postDelayed({
                     statusBanner.visibility = View.GONE
-                }, 5000)
+                }, 2000)
             }
         }
     }
@@ -155,7 +164,7 @@ class EscrowApproverActivity : AppCompatActivity() {
     private fun navigateToFindEscrow(publicKey: String, status: ConnectionStatus) {
         val intent = Intent(this, FindEscrowActivity::class.java)
         intent.putExtra("publicKey", publicKey)
-        intent.putExtra("connectionStatus", status.name) // Pasamos el estado como String
+        intent.putExtra("connectionStatus", status.name)
         startActivity(intent)
         finish()
     }
