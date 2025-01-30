@@ -3,10 +3,12 @@ package com.example.fideicomisoapproverring
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.fideicomisoapproverring.security.SecureWalletSessionManager
 import okhttp3.*
 import java.io.IOException
 
@@ -18,6 +20,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val secureSessionManager = SecureWalletSessionManager(applicationContext)
+
+
+        val session = secureSessionManager.getWalletSession()
+        session?.let {
+            Log.d("WalletSession", "Wallet: ${it.walletAddress}, Session: ${it.sessionToken}")
+        } ?: run {
+            Log.d("WalletSession", "No active session found.")
+        }
 
         engadmentIdInput = findViewById(R.id.engagementIdInput)
         enterButton = findViewById(R.id.enterButton)
