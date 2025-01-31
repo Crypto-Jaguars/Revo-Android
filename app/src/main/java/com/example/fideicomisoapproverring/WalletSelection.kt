@@ -3,6 +3,7 @@ package com.example.fideicomisoapproverring
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,19 +43,26 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSh
 
         walletList.adapter = WalletAdapter(wallets) { wallet ->
             if (wallet.isAvailable) {
+
                 val sessionToken = UUID.randomUUID().toString()
                 val deviceId = android.provider.Settings.Secure.getString(
                     requireContext().contentResolver,
                     android.provider.Settings.Secure.ANDROID_ID
                 )
 
+
                 sessionManager.saveWalletSession(wallet.name, sessionToken, deviceId)
+
+
                 onWalletSelected(wallet.name)
+
                 if (wallet.name == "LOBSTR") {
+
                     redirectToLobstrWallet()
                 }
                 dismiss()
             } else {
+
                 Toast.makeText(context, "${wallet.name} is not yet available.", Toast.LENGTH_SHORT).show()
             }
         }

@@ -1,14 +1,10 @@
 package com.example.fideicomisoapproverring.security
 
 import android.content.Context
-import android.util.Base64
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys.AES256_GCM_SPEC
 import androidx.security.crypto.MasterKeys.getOrCreate
-import javax.crypto.Cipher
-import javax.crypto.SecretKey
-import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.SecretKeySpec
 
 class SecureWalletSessionManager(context: Context) {
     private val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
@@ -20,69 +16,78 @@ class SecureWalletSessionManager(context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    fun saveWalletSession(walletAddress: String, sessionToken: String, deviceId: String) {
+    fun saveWalletSession(walletName: String, sessionToken: String, deviceId: String) {
         val timestamp = System.currentTimeMillis().toString()
 
         sharedPreferences.edit().apply {
-            putString("wallet_address", walletAddress)
+            putString("wallet_name", walletName)
             putString("session_token", sessionToken)
             putString("device_id", deviceId)
             putString("session_timestamp", timestamp)
+            putString("wallet_address", "")
+            putString("network", "public")
             apply()
         }
+
+        printStoredData()
+    }
+
+    fun updateWalletAddress(publicKey: String) {
+        sharedPreferences.edit().apply {
+            putString("wallet_address", publicKey)
+            apply()
+        }
+        printStoredData()
     }
 
     fun getWalletSession(): SessionData? {
-        val walletAddress = sharedPreferences.getString("wallet_address", null)
+        val walletName = sharedPreferences.getString("wallet_name", null)
         val sessionToken = sharedPreferences.getString("session_token", null)
         val deviceId = sharedPreferences.getString("device_id", null)
         val timestamp = sharedPreferences.getString("session_timestamp", null)?.toLongOrNull()
+        val walletAddress = sharedPreferences.getString("wallet_address", null)
+        val network = sharedPreferences.getString("network", null)
 
-        if (walletAddress != null && sessionToken != null && deviceId != null && timestamp != null) {
+        if (walletName != null && sessionToken != null && deviceId != null && timestamp != null) {
             if (System.currentTimeMillis() - timestamp > 24 * 60 * 60 * 1000) {
                 clearWalletSession()
                 return null
             }
-            return SessionData(walletAddress, sessionToken, deviceId, timestamp)
+            return SessionData(
+                walletName = walletName,
+                sessionToken = sessionToken,
+                deviceId = deviceId,
+                timestamp = timestamp,
+                walletAddress = walletAddress,
+                network = network
+            )
         }
         return null
     }
 
-    private fun clearWalletSession() {
+    fun clearWalletSession() {
         sharedPreferences.edit().clear().apply()
     }
 
-    private fun encrypt(value: String?): String? {
-        if (value == null) return null
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        val key = generateKey()
-        cipher.init(Cipher.ENCRYPT_MODE, key)
-        val iv = cipher.iv
-        val encryptedValue = cipher.doFinal(value.toByteArray())
-        return Base64.encodeToString(iv + encryptedValue, Base64.DEFAULT)
-    }
-
-    private fun decrypt(value: String?): String? {
-        if (value == null) return null
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        val key = generateKey()
-        val decodedValue = Base64.decode(value, Base64.DEFAULT)
-        val iv = decodedValue.copyOfRange(0, 16)
-        val encryptedValue = decodedValue.copyOfRange(16, decodedValue.size)
-        cipher.init(Cipher.DECRYPT_MODE, key, IvParameterSpec(iv))
-        return String(cipher.doFinal(encryptedValue))
-    }
-
-    private fun generateKey(): SecretKey {
-        val keyBytes = masterKeyAlias.toByteArray()
-        return SecretKeySpec(keyBytes, "AES")
+    fun printStoredData() {
+        val session = getWalletSession()
+        Log.d("WalletSession", """
+            Stored Data:
+            Wallet Name: ${session?.walletName}
+            Wallet Address: ${session?.walletAddress}
+            Session Token: ${session?.sessionToken}
+            Device ID: ${session?.deviceId}
+            Network: ${session?.network}
+            Timestamp: ${session?.timestamp}
+        """.trimIndent())
     }
 }
 
-
 data class SessionData(
-    val walletAddress: String,
+    val walletName: String,
     val sessionToken: String,
     val deviceId: String,
-    val timestamp: Long
+    val timestamp: Long,
+    val walletAddress: String? = null,
+    val network: String? = null
 )
