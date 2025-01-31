@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,7 +18,11 @@ import com.android.identity.util.UUID
 import com.example.fideicomisoapproverring.security.SecureWalletSessionManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.security.MessageDigest
-//import java.security.Signature
+import java.security.SecureRandom
+import javax.crypto.Mac
+import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
+
 
 class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSheetDialogFragment() {
 
@@ -28,7 +33,8 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSh
     companion object {
         private const val LOBSTR_PACKAGE = "com.lobstr.client"
         private const val LOBSTR_URI_SCHEME = "lobstr://"
-        private const val LOBSTR_SIGNATURE_HASH = ""
+        private const val LOBSTR_SIGNATURE_HASH = BuildConfig.LOBSTR_SIGNATURE_HASH
+        private const val MAX_TIMESTAMP_DIFF = 5 * 60 * 1000 // 5 minutes
     }
 
     override fun onCreateView(
@@ -77,101 +83,163 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSh
 
     private fun redirectToLobstrWallet() {
         try {
-            val packageManager = requireContext().packageManager
-            if (!isWalletPackageValid(LOBSTR_PACKAGE)) {
-                Log.e(TAG, "❌ Invalid or tampered wallet package")
-                showSecurityAlert("Invalid wallet package detected")
+            if (!validateSecurityRequirements()) {
+                showSecurityAlert("Security verification failed")
                 return
             }
-            val lobstrUri = validateAndBuildUri() ?: return
-            try {
-                val intent = Intent(Intent.ACTION_VIEW, lobstrUri).apply {
-                    setPackage(LOBSTR_PACKAGE)
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                    addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                    putExtra("source", "fideicomiso_approver")
-                    putExtra("timestamp", System.currentTimeMillis())
-                }
 
-                if (isIntentResolvable(intent)) {
-                    startActivity(intent)
-                    Log.d(TAG, "✅ Successfully redirected to Lobstr wallet")
-                } else {
-                    redirectToPlayStore()
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error launching wallet: ${e.message}")
-                redirectToPlayStore()
+            val secureUri = buildSecureWalletUri() ?: run {
+                showSecurityAlert("Invalid wallet configuration")
+                return
             }
+
+            launchWalletWithSecurity(secureUri)
+
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Security check failed: ${e.message}")
-            showSecurityAlert("Security verification failed")
+            Log.e(TAG, "Security error: ${e.message}")
+            showSecurityAlert("Security check failed")
         }
     }
-    private fun isWalletPackageValid(packageName: String): Boolean {
+
+    private fun validateSecurityRequirements(): Boolean {
         try {
             val packageManager = requireContext().packageManager
-            val packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
-            return packageInfo != null
+            val packageInfo = packageManager.getPackageInfo(
+                LOBSTR_PACKAGE,
+                PackageManager.GET_SIGNATURES or PackageManager.GET_META_DATA
+            )
 
-            // Commented out signature verification for now because its not available for lobstr from line 119 to line 132
-            /*
+
+            if (packageInfo == null) {
+                Log.e(TAG, "Package validation failed: Package not found")
+                return false
+            }
+
+
             @Suppress("DEPRECATION")
             val signatures = packageInfo.signatures
             if (signatures.isNullOrEmpty()) {
-                Log.e(TAG, "❌ No package signatures found")
+                Log.e(TAG, "Package validation failed: No signatures found")
                 return false
             }
 
+
             val signatureHash = calculateSignatureHash(signatures[0])
             if (signatureHash != LOBSTR_SIGNATURE_HASH) {
-                Log.e(TAG, "❌ Invalid package signature")
+                Log.e(TAG, "Package validation failed: Invalid signature")
                 return false
             }
-            */
-            // Commented out signature verification for now because its not available for lobstr from line 119 to line 132
+
+         
+            if (!validateInstallSource(packageManager, LOBSTR_PACKAGE)) {
+                Log.e(TAG, "Package validation failed: Invalid install source")
+                return false
+            }
+
+            return true
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Package validation failed: ${e.message}")
+            Log.e(TAG, "Security validation error: ${e.message}")
             return false
         }
     }
 
-    private fun validateAndBuildUri(): Uri? {
+    private fun buildSecureWalletUri(): Uri? {
         try {
-            val uriString = LOBSTR_URI_SCHEME
-            val uri = Uri.parse(uriString)
-            if (uri.scheme != "lobstr") {
-                Log.e(TAG, "❌ Invalid URI scheme")
+            val timestamp = System.currentTimeMillis()
+            val nonce = generateSecureNonce()
+
+            val baseUri = Uri.parse(LOBSTR_URI_SCHEME)
+            if (baseUri.scheme != "lobstr") {
+                Log.e(TAG, "URI validation failed: Invalid scheme")
                 return null
             }
-            val secureUriBuilder = uri.buildUpon()
-                .appendQueryParameter("source", "fideicomiso_approver")
-                .appendQueryParameter("timestamp", System.currentTimeMillis().toString())
-                .appendQueryParameter("nonce", generateNonce())
 
-            Log.d(TAG, "✅ URI validation successful")
-            return secureUriBuilder.build()
+            return baseUri.buildUpon()
+                .appendPath("connect")
+                .appendQueryParameter("app", "fideicomiso_approver")
+                .appendQueryParameter("nonce", nonce)
+                .appendQueryParameter("timestamp", timestamp.toString())
+                .appendQueryParameter("version", BuildConfig.VERSION_NAME)
+                .appendQueryParameter("signature", generateRequestSignature(nonce, timestamp))
+                .build()
         } catch (e: Exception) {
-            Log.e(TAG, "❌ URI validation failed: ${e.message}")
+            Log.e(TAG, "URI building error: ${e.message}")
             return null
         }
+    }
+
+    private fun launchWalletWithSecurity(uri: Uri) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                setPackage(LOBSTR_PACKAGE)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+
+
+            if (!isIntentResolvable(intent)) {
+                redirectToPlayStore()
+                return
+            }
+
+            startActivity(intent)
+            Log.d(TAG, "Wallet launched with secure parameters")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Wallet launch error: ${e.message}")
+            redirectToPlayStore()
+        }
+    }
+
+    private fun validateInstallSource(pm: PackageManager, packageName: String): Boolean {
+        return try {
+            val installSource = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                pm.getInstallSourceInfo(packageName).installingPackageName
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getInstallerPackageName(packageName)
+            }
+
+
+            val validSources = listOf(
+                "com.android.vending",
+                "com.google.android.packageinstaller"
+            )
+
+            validSources.contains(installSource)
+        } catch (e: Exception) {
+            Log.e(TAG, "Install source validation failed: ${e.message}")
+            false
+        }
+    }
+
+    private fun generateSecureNonce(): String {
+        val random = SecureRandom()
+        val bytes = ByteArray(32)
+        random.nextBytes(bytes)
+        return bytes.joinToString("") { "%02x".format(it) }
+    }
+
+    private fun generateRequestSignature(nonce: String, timestamp: Long): String {
+        val data = "$nonce:$timestamp:${BuildConfig.APP_SECRET_KEY}"
+        val mac = Mac.getInstance("HmacSHA256")
+        val secretKeySpec = SecretKeySpec(BuildConfig.APP_SECRET_KEY.toByteArray(), "HmacSHA256")
+        mac.init(secretKeySpec)
+        return mac.doFinal(data.toByteArray()).joinToString("") { "%02x".format(it) }
+    }
+
+    private fun calculateSignatureHash(signature: Signature): String {
+        val md = MessageDigest.getInstance("SHA-256")
+        return md.digest(signature.toByteArray()).joinToString("") { "%02x".format(it) }
     }
 
     private fun isIntentResolvable(intent: Intent): Boolean {
         return requireContext().packageManager.queryIntentActivities(
             intent, PackageManager.MATCH_DEFAULT_ONLY
         ).isNotEmpty()
-    }
-
-    private fun calculateSignatureHash(signature: Signature): String {
-        val md = MessageDigest.getInstance("SHA-256")
-        val hash = md.digest(signature.toByteArray())
-        return hash.joinToString("") { "%02x".format(it) }
-    }
-
-    private fun generateNonce(): String {
-        return UUID.randomUUID().toString()
     }
 
     private fun redirectToPlayStore() {

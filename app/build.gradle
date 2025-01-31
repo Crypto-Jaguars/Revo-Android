@@ -18,6 +18,8 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+        buildConfigField("String", "LOBSTR_SIGNATURE_HASH", "\"d3d5424bbc3039c8\"")
+        buildConfigField("String", "APP_SECRET_KEY", "\"your_secret_key_here\"")
     }
 
     buildTypes {
@@ -35,6 +37,7 @@ android {
     }
     buildFeatures {
         compose true
+        buildConfig true
     }
     composeOptions {
         kotlinCompilerExtensionVersion '1.5.1'
