@@ -48,15 +48,11 @@ class MainActivity : AppCompatActivity() {
     private fun checkWalletSession() {
         val session = sessionManager.getWalletSession()
         if (session != null) {
-            Log.d(TAG, "Wallet Name: ${session.walletName}")
-            Log.d(TAG, "Session Token: ${session.sessionToken}")
-            Log.d(TAG, "Device ID: ${session.deviceId}")
-            Log.d(TAG, "Timestamp: ${session.timestamp}")
+            Log.d(TAG, "Active session found for wallet")
 
             handleActiveSession(session)
         } else {
             Log.d(TAG, "No active session found")
-            Log.d(TAG, "Launching wallet selection")
             showWalletSelection()
         }
     }
