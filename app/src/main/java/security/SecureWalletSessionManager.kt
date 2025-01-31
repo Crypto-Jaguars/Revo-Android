@@ -74,11 +74,8 @@ class SecureWalletSessionManager(context: Context) {
         Log.d("WalletSession", """
             Stored Data:
             Wallet Name: ${session?.walletName}
-            Wallet Address: ${session?.walletAddress}
-            Session Token: ${session?.sessionToken}
-            Device ID: ${session?.deviceId}
             Network: ${session?.network}
-            Timestamp: ${session?.timestamp}
+            Session Active: ${session != null}
         """.trimIndent())
     }
 }
