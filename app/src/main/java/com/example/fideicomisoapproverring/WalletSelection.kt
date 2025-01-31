@@ -116,8 +116,14 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) : BottomSh
             }
 
 
-            @Suppress("DEPRECATION")
-            val signatures = packageInfo.signatures
+            val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val signingInfo = packageInfo.signingInfo
+                signingInfo.apkContentsSigners
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.signatures
+            }
+
             if (signatures.isNullOrEmpty()) {
                 Log.e(TAG, "Package validation failed: No signatures found")
                 return false
