@@ -13,7 +13,7 @@ data class Product(
     val imageUrl: String,
     val isAvailable: Boolean,
     val farmerId: String,
-    val certifications: List<String>,
+    val certifications: List<String> = emptyList(),
     val isLoading: Boolean = false
 ) : Parcelable {
     companion object {

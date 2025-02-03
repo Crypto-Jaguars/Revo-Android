@@ -105,7 +105,12 @@ class ProductGridActivity : AppCompatActivity() {
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val savedProducts = savedInstanceState.getParcelableArrayList<Product>(KEY_PRODUCTS)
+        val savedProducts = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            savedInstanceState.getParcelableArrayList(KEY_PRODUCTS, Product::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            savedInstanceState.getParcelableArrayList(KEY_PRODUCTS)
+        }
         savedProducts?.let {
             adapter.submitList(it)
         }
@@ -164,9 +169,10 @@ class ProductGridActivity : AppCompatActivity() {
                 }
                 result.fold(
                     onSuccess = { newProducts ->
-                        if (newProducts.isNotEmpty()) {
+                        val filteredProducts = newProducts.filter { it.isAvailable }
+                        if (filteredProducts.isNotEmpty()) {
                             val currentList = ArrayList(adapter.currentList)
-                            currentList.addAll(newProducts)
+                            currentList.addAll(filteredProducts)
                             adapter.submitList(currentList)
                             currentPage++
                         }
@@ -174,17 +180,11 @@ class ProductGridActivity : AppCompatActivity() {
                     },
                     onFailure = { e ->
                         isLoading = false
-                        if (adapter.currentList.isEmpty()) {
-                            showLoadMoreError()
-                        }
                         Log.e("ProductGridActivity", "Error loading more products", e)
                     }
                 )
             } catch (e: Exception) {
                 isLoading = false
-                if (adapter.currentList.isEmpty()) {
-                    showLoadMoreError()
-                }
                 Log.e("ProductGridActivity", "Error loading more products", e)
             }
         }
