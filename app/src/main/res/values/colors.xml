@@ -15,4 +15,5 @@
     <color name="background_dark">#1E1B24</color>
     <color name="text_primary">#E6E1E5</color>
     <color name="text_secondary">#CAC4D0</color>
+    <color name="neutro">#0D0D0D</color>
 </resources>

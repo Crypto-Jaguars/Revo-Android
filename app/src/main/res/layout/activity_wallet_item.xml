@@ -5,24 +5,33 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="16dp"
-    android:background="@color/black">
+    android:background="@color/neutro">
 
-    <!-- Wallet name -->
+    <!-- Nombre de la wallet (a la izquierda) -->
     <TextView
         android:id="@+id/walletName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:paddingStart="16dp" />
 
-    <!-- Wallet status -->
-    <TextView
-        android:id="@+id/walletStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Not available"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="14sp"
-        android:visibility="gone" />
+    <!-- Ícono de la wallet (cerca de la flecha) -->
+    <ImageView
+        android:id="@+id/walletIcon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/xbulllogo"
+        android:contentDescription="@string/wallet_icon_desc" />
+
+    <!-- Flecha lateral (siempre a la derecha) -->
+    <ImageView
+        android:id="@+id/arrowIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/arrowicon"
+        android:contentDescription="@string/arrow_icon_desc" />
+
 </LinearLayout>
