@@ -21,4 +21,12 @@
     <!-- Shimmer effect colors -->
     <color name="shimmer_color">#1FFFFFFF</color>
     <color name="shimmer_dark">#1A000000</color>
+    <color name="soil_brown">#5D4037</color>
+    <color name="wheat_gold">#F9C74F</color>
+    <color name="leaf_green">#43A047</color>
+    <color name="sky_blue">#90CAF9</color>
+    <color name="background_dark">#1E1B24</color>
+    <color name="text_primary">#E6E1E5</color>
+    <color name="text_secondary">#CAC4D0</color>
+    <color name="neutro">#0D0D0D</color>
 </resources>

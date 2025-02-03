@@ -1,10 +1,12 @@
-// WalletAdapter.kt
+
 package com.example.fideicomisoapproverring
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 
 class WalletAdapter(
@@ -13,8 +15,9 @@ class WalletAdapter(
 ) : RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
 
     class WalletViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val walletIcon: ImageView = itemView.findViewById(R.id.walletIcon)
         val walletName: TextView = itemView.findViewById(R.id.walletName)
-        val walletStatus: TextView = itemView.findViewById(R.id.walletStatus)
+        val arrowIcon: ImageView = itemView.findViewById(R.id.arrowIcon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WalletViewHolder {
@@ -24,18 +27,21 @@ class WalletAdapter(
 
     override fun onBindViewHolder(holder: WalletViewHolder, position: Int) {
         val wallet = walletOptions[position]
+
+        holder.walletIcon.setImageResource(wallet.iconRes)
         holder.walletName.text = wallet.name
-        holder.walletStatus.text = if (wallet.isAvailable) "" else "Not available"
-        holder.walletStatus.visibility = if (wallet.isAvailable) View.GONE else View.VISIBLE
+        holder.arrowIcon.visibility = View.VISIBLE
 
-        // Change color according to availability
-        holder.walletName.setTextColor(
-            if (wallet.isAvailable) holder.itemView.context.getColor(android.R.color.white)
-            else holder.itemView.context.getColor(android.R.color.darker_gray)
-        )
-
-        holder.itemView.setOnClickListener { onWalletSelected(wallet) }
+        holder.itemView.setOnClickListener {
+            if (wallet.isAvailable) {
+                onWalletSelected(wallet)
+            } else {
+                Toast.makeText(holder.itemView.context, "${wallet.name} is not available.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun getItemCount(): Int = walletOptions.size
 }
+
+

@@ -20,6 +20,8 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+        buildConfigField("String", "LOBSTR_SIGNATURE_HASH", properties['LOBSTR_SIGNATURE_HASH'] ?: "\"\"")
+        buildConfigField("String", "APP_SECRET_KEY", properties['APP_SECRET_KEY'] ?: "\"\"")
     }
 
     buildTypes {
@@ -37,13 +39,20 @@ android {
     }
     buildFeatures {
         compose true
+        buildConfig true
     }
     composeOptions {
         kotlinCompilerExtensionVersion '1.5.1'
     }
     packaging {
         resources {
-            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            excludes += [
+                'META-INF/versions/9/OSGI-INF/MANIFEST.MF',
+                'META-INF/MANIFEST.MF',
+                'META-INF/*.RSA',
+                'META-INF/*.SF',
+                'META-INF/*.DSA'
+            ]
         }
     }
     configurations {
@@ -83,6 +92,7 @@ dependencies {
     // Shimmer effect
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 
+    implementation libs.identity.jvm
     def multidex_version = "2.0.1"
     implementation "androidx.multidex:multidex:$multidex_version"
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
@@ -97,6 +107,9 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
     implementation 'org.json:json:20210307'
+    implementation 'com.airbnb.android:lottie:5.2.0'
+    implementation 'com.airbnb.android:lottie-compose:6.0.0'
+    implementation 'com.airbnb.android:lottie:6.0.0'
 
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime.ktx
@@ -113,6 +126,8 @@ dependencies {
     androidTestImplementation libs.androidx.ui.test.junit4
     debugImplementation libs.androidx.ui.tooling
     debugImplementation libs.androidx.ui.test.manifest
+    implementation "androidx.security:security-crypto:1.1.0-alpha06"
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
 
     implementation 'com.github.RingOfRings:RingOfRingsSDK:1.1.0'
 
@@ -129,6 +144,9 @@ dependencies {
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
     testImplementation 'com.squareup.okhttp3:okhttp:4.9.3'
     testImplementation 'org.robolectric:robolectric:4.10.3'
+    testImplementation 'androidx.appcompat:appcompat:1.6.1'
+
+    // Android Testing
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'androidx.test:runner:1.5.2'
@@ -147,6 +165,11 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.0"
+    implementation('com.github.stellar:java-stellar-sdk:0.43.0') {
+        exclude group: 'org.bouncycastle'
+    }
+
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'
 }
 
 subprojects {
@@ -157,5 +180,13 @@ subprojects {
                 details.because 'Avoiding duplicate classes from different versions'
             }
         }
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.bouncycastle:bcprov-jdk18on:1.78.1'
+        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15to18'
+        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
     }
 }

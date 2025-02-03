@@ -5,6 +5,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <queries>
+        <package android:name="com.lobstr.client" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="lobstr" />
+        </intent>
+    </queries>
+
     <application
         tools:replace="android:theme"
         android:allowBackup="true"
@@ -51,6 +59,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+            android:name=".ErrorPageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FideicomisoApproverRing" />
     </application>
 
 </manifest>
