@@ -2,6 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <queries>
+        <package android:name="com.lobstr.client" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="lobstr" />
+        </intent>
+    </queries>
+
     <application
         tools:replace="android:theme"
         android:allowBackup="true"
@@ -43,6 +53,10 @@
             android:label="@string/titleText"
             android:theme="@style/Theme.FideicomisoApproverRing">
         </activity>
+        <activity
+            android:name=".ErrorPageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FideicomisoApproverRing" />
     </application>
 
 </manifest>

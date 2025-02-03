@@ -2,23 +2,28 @@ package com.example.fideicomisoapproverring
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import okhttp3.*
 import org.json.JSONObject
+import java.io.IOException
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.SubmitTransactionResponse
-import java.io.IOException
 import java.lang.Exception
 
 class FindEscrowActivity : AppCompatActivity() {
+
     private lateinit var loadingPanel: LinearLayout
     private lateinit var form: LinearLayout
 
@@ -27,6 +32,10 @@ class FindEscrowActivity : AppCompatActivity() {
     private lateinit var enterButton: Button
     private lateinit var balanceTextView: TextView
     private lateinit var logoutButton: Button
+
+    private lateinit var statusBanner: View
+    private lateinit var statusIcon: ImageView
+    private lateinit var statusText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +49,21 @@ class FindEscrowActivity : AppCompatActivity() {
         enterButton = findViewById(R.id.enterButton)
         balanceTextView = findViewById(R.id.balanceTextView)
         logoutButton = findViewById(R.id.logoutButton)
+
+        statusBanner = findViewById(R.id.statusBanner)
+        statusIcon = findViewById(R.id.statusIcon)
+        statusText = findViewById(R.id.statusText)
+
+        val statusBanner: RelativeLayout = findViewById(R.id.statusBanner)
+        val statusIcon: ImageView = findViewById(R.id.statusIcon)
+        val statusText: TextView = findViewById(R.id.statusText)
+
+        // Obtener el estado de la conexión desde el intent
+        val connectionStatus = intent.getStringExtra("connectionStatus")
+
+        if (connectionStatus == ConnectionStatus.SUCCESS.name) {
+            showStatusBanner(ConnectionStatus.SUCCESS, statusBanner, statusIcon, statusText)
+        }
 
         // Manages the logic of the “Enter” button.
         enterButton.setOnClickListener {
@@ -102,53 +126,41 @@ class FindEscrowActivity : AppCompatActivity() {
         contractIdInput.setText("")
     }
 
-    private fun fetchEngagementData(
-        engagementId: String,
-        contractId: String,
-    ) {
+    private fun fetchEngagementData(engagementId: String, contractId: String) {
         val url = "https://api.trustlesswork.com/escrow/get-escrow-by-engagement-id?contractId=$contractId&engagementId=$engagementId"
         val client = OkHttpClient()
-        val request =
-            Request.Builder()
-                .url(url)
-                .build()
+        val request = Request.Builder()
+            .url(url)
+            .build()
 
-        client.newCall(request).enqueue(
-            object : Callback {
-                override fun onFailure(
-                    call: Call,
-                    e: IOException,
-                ) {
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    loadingPanel.visibility = View.GONE
+                    Toast.makeText(this@FindEscrowActivity, "Connection error", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    val responseBody = response.body?.string()
                     runOnUiThread {
-                        loadingPanel.visibility = View.GONE
-                        Toast.makeText(this@FindEscrowActivity, "Connection error", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onResponse(
-                    call: Call,
-                    response: Response,
-                ) {
-                    if (response.isSuccessful) {
-                        val responseBody = response.body?.string()
-                        runOnUiThread {
-                            val intent = Intent(this@FindEscrowActivity, EscrowDetailsActivity::class.java)
-                            if (response.code == 200) {
-                                intent.putExtra("escrowData", responseBody.toString())
-                                intent.putExtra("engagementID", engagementId)
-                            }
-                            startActivity(intent)
-                        }
-                    } else {
-                        runOnUiThread {
-                            val intent = Intent(this@FindEscrowActivity, EscrowDetailsActivity::class.java)
+                        val intent = Intent(this@FindEscrowActivity, EscrowDetailsActivity::class.java)
+                        if (response.code == 200) {
+                            intent.putExtra("escrowData", responseBody.toString())
                             intent.putExtra("engagementID", engagementId)
-                            startActivity(intent)
                         }
+                        startActivity(intent)
+                    }
+                } else {
+                    runOnUiThread {
+                        val intent = Intent(this@FindEscrowActivity, EscrowDetailsActivity::class.java)
+                        intent.putExtra("engagementID", engagementId)
+                        startActivity(intent)
                     }
                 }
-            },
-        )
+            }
+        })
     }
 
     private fun fetchBalance(publicKey: String) {
@@ -156,36 +168,28 @@ class FindEscrowActivity : AppCompatActivity() {
         val client = OkHttpClient()
         val request = Request.Builder().url(url).build()
 
-        client.newCall(request).enqueue(
-            object : Callback {
-                override fun onFailure(
-                    call: Call,
-                    e: IOException,
-                ) {
-                    runOnUiThread {
-                        Toast.makeText(this@FindEscrowActivity, "Error connecting to server: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(this@FindEscrowActivity, "Error connecting to server: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
+            }
 
-                override fun onResponse(
-                    call: Call,
-                    response: Response,
-                ) {
-                    if (response.isSuccessful) {
-                        val responseBody = response.body?.string()
-                        val balance = parseBalance(responseBody)
-                        runOnUiThread {
-                            balanceTextView.visibility = View.VISIBLE
-                            balanceTextView.text = "Balance: $balance XLM"
-                        }
-                    } else {
-                        runOnUiThread {
-                            Toast.makeText(this@FindEscrowActivity, "Account not found or invalid.", Toast.LENGTH_SHORT).show()
-                        }
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    val responseBody = response.body?.string()
+                    val balance = parseBalance(responseBody)
+                    runOnUiThread {
+                        balanceTextView.visibility = View.VISIBLE
+                        balanceTextView.text = "Balance: $balance XLM"
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(this@FindEscrowActivity, "Account not found or invalid.", Toast.LENGTH_SHORT).show()
                     }
                 }
-            },
-        )
+            }
+        })
     }
 
     private fun parseBalance(response: String?): String {
@@ -207,7 +211,7 @@ class FindEscrowActivity : AppCompatActivity() {
     private fun setupSignTransactionButton() {
         val signTransactionButton: Button = findViewById(R.id.signTransactionButton)
         signTransactionButton.setOnClickListener {
-            // Recuperar clave pública desde SharedPreferences
+
             val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
             val publicKey = sharedPreferences.getString("publicKey", null)
 
@@ -216,11 +220,10 @@ class FindEscrowActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Mostrar diálogo para ingresar la clave privada
-            val privateKeyInput =
-                EditText(this).apply {
-                    hint = "Enter Private Key"
-                }
+
+            val privateKeyInput = EditText(this).apply {
+                hint = "Enter Private Key"
+            }
 
             AlertDialog.Builder(this)
                 .setTitle("Sign Transaction")
@@ -229,7 +232,7 @@ class FindEscrowActivity : AppCompatActivity() {
                 .setPositiveButton("Sign") { _, _ ->
                     val privateKey = privateKeyInput.text.toString()
                     if (privateKey.isNotEmpty()) {
-                        // Llamar a la función para firmar y enviar la transacción
+
                         signAndSendTransaction(privateKey, publicKey)
                     } else {
                         Toast.makeText(this, "Private key is required to sign.", Toast.LENGTH_SHORT).show()
@@ -240,39 +243,34 @@ class FindEscrowActivity : AppCompatActivity() {
         }
     }
 
-    private fun signAndSendTransaction(
-        privateKey: String,
-        publicKey: String,
-    ) {
+    private fun signAndSendTransaction(privateKey: String, publicKey: String) {
         try {
-            // Conectar al servidor de Horizon (Testnet)
+
             val server = Server("https://horizon-testnet.stellar.org")
 
-            // Obtener el estado de la cuenta
+
             val sourceAccount = server.accounts().account(publicKey)
 
-            // Crear la transacción
-            val transaction =
-                Transaction.Builder(sourceAccount, Network.TESTNET)
-                    .addOperation(
-                        PaymentOperation.Builder(
-                            "GCDXSOPD5T5MCGCPPRV3CWMYLTTWASVZBF4HZBNES6PGK7YRATM27NB4", // Cambia esto por la clave pública de destino
-                            AssetTypeNative(),
-                            "1000", // Cantidad a enviar (en XLM)
-                        ).build(),
-                    )
-                    .setTimeout((System.currentTimeMillis() / 1000) + 300) // Configura un timeout de 5 minutos desde ahora
-                    .setBaseFee(Transaction.MIN_BASE_FEE.toLong())
-                    .build()
 
-            // Firmar la transacción con la clave privada proporcionada
+            val transaction = Transaction.Builder(sourceAccount, Network.TESTNET)
+                .addOperation(
+                    PaymentOperation.Builder(
+                        "GCDXSOPD5T5MCGCPPRV3CWMYLTTWASVZBF4HZBNES6PGK7YRATM27NB4",
+                        AssetTypeNative(),
+                        "1000"
+                    ).build()
+                )
+                .setTimeout((System.currentTimeMillis() / 1000) + 300)
+                .setBaseFee(Transaction.MIN_BASE_FEE.toLong())
+                .build()
+
+
             val keyPair = KeyPair.fromSecretSeed(privateKey)
             transaction.sign(keyPair)
 
-            // Enviar la transacción a la red Stellar
+
             val response: SubmitTransactionResponse = server.submitTransaction(transaction)
 
-            // Mostrar el resultado
             if (response.isSuccess) {
                 runOnUiThread {
                     Toast.makeText(this, "Transaction successful!", Toast.LENGTH_LONG).show()
@@ -289,4 +287,30 @@ class FindEscrowActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun showStatusBanner(status: ConnectionStatus, banner: RelativeLayout, icon: ImageView, text: TextView) {
+        when (status) {
+            ConnectionStatus.SUCCESS -> {
+                banner.setBackgroundResource(R.drawable.toast_success)
+                icon.setImageResource(R.drawable.check)
+                text.text = "Connection Successfully"
+            }
+            ConnectionStatus.ERROR -> {
+                banner.setBackgroundResource(R.drawable.toast_error)
+                icon.setImageResource(R.drawable.cancel)
+                text.text = "Error: Unable to connect."
+            }
+            ConnectionStatus.WARNING -> {
+                banner.setBackgroundResource(R.drawable.toast_warning)
+                icon.setImageResource(R.drawable.info)
+                text.text = "Action Required: Please check your input."
+            }
+        }
+
+        banner.visibility = View.VISIBLE
+        Handler(Looper.getMainLooper()).postDelayed({
+            banner.visibility = View.GONE
+        }, 3000)
+    }
+
 }
