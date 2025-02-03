@@ -89,11 +89,6 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.squareup.okhttp)
-    implementation(libs.wallet.sdk) {
-        exclude(group = "commons-codec", module = "commons-codec")
-        exclude(group = "org.jetbrains", module = "annotations")
-        exclude(group = "com.github.stellar", module = "java-stellar-sdk")
-    }
     implementation(libs.wallet.sdk)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
