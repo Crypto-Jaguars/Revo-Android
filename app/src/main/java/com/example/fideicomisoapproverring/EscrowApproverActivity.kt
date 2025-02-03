@@ -2,6 +2,7 @@ package com.example.fideicomisoapproverring
 
 import ConnectingDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -85,16 +86,6 @@ class EscrowApproverActivity : AppCompatActivity() {
             startActivity(fallbackIntent)
             Toast.makeText(this, "Please install Lobstr Wallet to continue.", Toast.LENGTH_LONG).show()
         }
-    }
-
-    private fun showWalletSelectionDialog() {
-        val walletSelectionDialog = WalletSelection { walletName ->
-            Toast.makeText(this, "Selected wallet: $walletName", Toast.LENGTH_SHORT).show()
-            if (walletName == "LOBSTR") {
-                // If LOBSTR is selected, it is automatically redirected from WalletSelection
-            }
-        }
-        walletSelectionDialog.show(supportFragmentManager, "WalletSelection")
     }
 
     private fun validatePublicKey(publicKey: String) {

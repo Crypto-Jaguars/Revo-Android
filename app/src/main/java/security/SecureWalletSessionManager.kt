@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys.AES256_GCM_SPEC
 import androidx.security.crypto.MasterKeys.getOrCreate
-import java.util.Base64
 
 class SecureWalletSessionManager(context: Context) {
     private val TAG = "SecureWallet"

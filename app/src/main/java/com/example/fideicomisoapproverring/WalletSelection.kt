@@ -21,7 +21,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Mac
-import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 
@@ -29,13 +28,12 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) :
     BottomSheetDialogFragment() {
 
     private val TAG = "Session"
-    data class WalletOption(val name: String, val isAvailable: Boolean)
     private lateinit var sessionManager: SecureWalletSessionManager
 
     companion object {
         private const val LOBSTR_PACKAGE = "com.lobstr.client"
         private const val LOBSTR_URI_SCHEME = "lobstr://"
-        private const val LOBSTR_SIGNATURE_HASH = BuildConfig.LOBSTR_SIGNATURE_HASH
+        private val LOBSTR_SIGNATURE_HASH = BuildConfig.LOBSTR_SIGNATURE_HASH
         private const val MAX_TIMESTAMP_DIFF = 5 * 60 * 1000 // 5 minutes
     }
 
@@ -129,7 +127,7 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) :
 
             val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 val signingInfo = packageInfo.signingInfo
-                signingInfo.apkContentsSigners
+                signingInfo?.apkContentsSigners
             } else {
                 @Suppress("DEPRECATION")
                 packageInfo.signatures

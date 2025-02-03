@@ -18,6 +18,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        buildConfigField("String", "LOBSTR_SIGNATURE_HASH", properties["LOBSTR_SIGNATURE_HASH"].toString())
+        buildConfigField("String", "APP_SECRET_KEY", properties["APP_SECRET_KEY"].toString())
     }
 
     buildTypes {
@@ -40,6 +42,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -47,12 +50,18 @@ android {
     }
 
     packaging {
-        resources.excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+        resources {
+            excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+            excludes.add("META-INF/MANIFEST.MF")
+            excludes.add("META-INF/*.RSA")
+            excludes.add("META-INF/*.SF")
+            excludes.add("META-INF/*.DSA")
+        }
     }
 
-    configurations.configureEach {
-        exclude(group = "com.facebook.conceal", module = "conceal")
-        exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
+    configurations.all {
+        exclude(module = "conceal")
+        exclude(module = "bcprov-jdk15on")
     }
 
     androidResources {
@@ -104,6 +113,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
+
+    implementation(libs.lottie)
+    implementation(libs.androidx.encryption)
+    implementation(libs.identity.jvm)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -113,6 +126,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.github.ringofringssdk)
+
+    implementation(libs.java.stellar.sdk) {
+        exclude(group = "org.bouncycastle")
+    }
+
+    implementation(libs.bouncy.castle)
 
     // Testing Dependencies
     testImplementation(libs.junit)
@@ -128,6 +147,8 @@ dependencies {
     testImplementation(libs.squareup.okhttp)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.appcompat)
+
+
 
     // Android Testing
     androidTestImplementation(libs.androidx.junit)
@@ -148,5 +169,13 @@ subprojects {
                 }
             }
         }
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("org.bouncycastle:bcprov-jdk18on:1.78.1")
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk15to18")
+        exclude(group = "org.bouncycastle", module="bcprov-jdk15on")
     }
 }
