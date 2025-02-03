@@ -150,13 +150,12 @@ class ProductGridActivity : AppCompatActivity() {
     private fun loadMoreProducts() {
         if (isLoading) return
         isLoading = true
-        showLoadingMoreIndicator()
         
         loadMoreJob?.cancel()
         loadMoreJob = lifecycleScope.launch(Dispatchers.Main) {
             try {
                 if (currentPage >= MAX_PAGES) {
-                    hideLoadingMoreIndicator()
+                    isLoading = false
                     return@launch
                 }
 
@@ -165,48 +164,45 @@ class ProductGridActivity : AppCompatActivity() {
                 }
                 result.fold(
                     onSuccess = { newProducts ->
-                        if (newProducts.isEmpty()) {
-                            hideLoadingMoreIndicator()
-                            return@launch
+                        if (newProducts.isNotEmpty()) {
+                            val currentList = ArrayList(adapter.currentList)
+                            currentList.addAll(newProducts)
+                            adapter.submitList(currentList)
+                            currentPage++
                         }
-                        
-                        val currentList = ArrayList(adapter.currentList)
-                        currentList.addAll(newProducts)
-                        adapter.submitList(currentList)
-                        
-                        currentPage++
                         isLoading = false
-                        hideLoadingMoreIndicator()
                     },
                     onFailure = { e ->
                         isLoading = false
-                        hideLoadingMoreIndicator()
-                        showLoadMoreError()
+                        if (adapter.currentList.isEmpty()) {
+                            showLoadMoreError()
+                        }
                         Log.e("ProductGridActivity", "Error loading more products", e)
                     }
                 )
             } catch (e: Exception) {
                 isLoading = false
-                hideLoadingMoreIndicator()
-                showLoadMoreError()
+                if (adapter.currentList.isEmpty()) {
+                    showLoadMoreError()
+                }
                 Log.e("ProductGridActivity", "Error loading more products", e)
             }
         }
     }
 
     private fun showLoadingMoreIndicator() {
-     
-        val currentList = ArrayList(adapter.currentList)
-        currentList.add(Product.LoadingItem)
-        adapter.submitList(currentList)
+        if (adapter.currentList.isNotEmpty()) {
+            val currentList = ArrayList(adapter.currentList)
+            currentList.add(Product.LoadingItem)
+            adapter.submitList(currentList)
+        }
     }
 
     private fun hideLoadingMoreIndicator() {
-   
         val currentList = ArrayList(adapter.currentList)
-        if (currentList.lastOrNull()?.isLoading == true) {
-            currentList.removeAt(currentList.lastIndex)
-            adapter.submitList(currentList)
+        val filteredList = currentList.filter { !it.isLoading }
+        if (filteredList.size != currentList.size) {
+            adapter.submitList(filteredList)
         }
     }
 

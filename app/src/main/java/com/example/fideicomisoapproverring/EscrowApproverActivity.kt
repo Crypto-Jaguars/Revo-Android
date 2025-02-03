@@ -1,7 +1,8 @@
 package com.example.fideicomisoapproverring
 
-import ConnectingDialog
+import com.example.fideicomisoapproverring.ConnectingDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -173,13 +174,6 @@ class EscrowApproverActivity : AppCompatActivity() {
 
 
 
-
-    private fun showWalletSelectionDialog() {
-        val walletSelectionDialog = WalletSelection { walletName ->
-            Toast.makeText(this, "Selected wallet: $walletName", Toast.LENGTH_SHORT).show()
-        }
-        walletSelectionDialog.show(supportFragmentManager, "WalletSelection")
-    }
 
     private fun savePublicKey(publicKey: String) {
         val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)

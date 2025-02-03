@@ -3,7 +3,7 @@
     <string name="engagementId">Engagement ID</string>
     <string name="contractId">Contract ID</string>
     <string name="enterButton">Enter</string>
-    <string name="escrow_approver">Escrow_Approver</string>
+    <string name="escrow_approver">Escrow Approver</string>
     <string name="view_details">View Details</string>
     <string name="no_products_available">No Products Available</string>
     <string name="check_back_later">Check back later for new products</string>
@@ -27,7 +27,6 @@
     <string name="error_report_subject">Farm Error Report: %1$s</string>
     <string name="error_report_body">Error Type: %1$s\nDevice: %2$s</string>
     <string name="error_no_email">No email app found</string>
-    <string name="escrow_approver">Escrow Approver</string>
     <string name="choose_your">Choose your preferred wallet</string>
     <string name="view_qr_cod">View QR code instead</string>
     <string name="wallet_icon_desc">Wallet icon</string>

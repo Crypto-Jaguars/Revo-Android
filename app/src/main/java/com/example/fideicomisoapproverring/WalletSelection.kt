@@ -29,7 +29,6 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) :
     BottomSheetDialogFragment() {
 
     private val TAG = "Session"
-    data class WalletOption(val name: String, val isAvailable: Boolean)
     private lateinit var sessionManager: SecureWalletSessionManager
 
     companion object {
@@ -38,6 +37,8 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) :
         private const val LOBSTR_SIGNATURE_HASH = BuildConfig.LOBSTR_SIGNATURE_HASH
         private const val MAX_TIMESTAMP_DIFF = 5 * 60 * 1000 // 5 minutes
     }
+
+    data class WalletOption(val name: String, val iconRes: Int, val isAvailable: Boolean)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -287,9 +288,6 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) :
                 .show()
         }
     }
-
-
-    data class WalletOption(val name: String, val iconRes: Int, val isAvailable: Boolean)
 }
 
 
