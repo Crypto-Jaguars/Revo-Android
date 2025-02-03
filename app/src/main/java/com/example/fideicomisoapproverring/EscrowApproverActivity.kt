@@ -72,6 +72,31 @@ class EscrowApproverActivity : AppCompatActivity() {
         }
     }
 
+    private fun redirectToLobstrWallet() {
+        try {
+            val lobstrUri = "lobstr://"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(lobstrUri))
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            startActivity(intent)
+        } catch (e: Exception) {
+            // If the app is not installed, redirects to the Play Store.
+            val playStoreUri = "https://play.google.com/store/apps/details?id=com.lobstr.client"
+            val fallbackIntent = Intent(Intent.ACTION_VIEW, Uri.parse(playStoreUri))
+            startActivity(fallbackIntent)
+            Toast.makeText(this, "Please install Lobstr Wallet to continue.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun showWalletSelectionDialog() {
+        val walletSelectionDialog = WalletSelection { walletName ->
+            Toast.makeText(this, "Selected wallet: $walletName", Toast.LENGTH_SHORT).show()
+            if (walletName == "LOBSTR") {
+                // If LOBSTR is selected, it is automatically redirected from WalletSelection
+            }
+        }
+        walletSelectionDialog.show(supportFragmentManager, "WalletSelection")
+    }
+
     private fun validatePublicKey(publicKey: String) {
         val url = "https://horizon-testnet.stellar.org/accounts/$publicKey"
         val client = OkHttpClient()
