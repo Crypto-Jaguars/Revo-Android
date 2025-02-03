@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle"
+    android:padding="10dp"
+    android:radius="12dp">
+
+    <solid android:color="#FFC107" /> <!-- Color amarillo de advertencia -->
+    <corners android:radius="16dp"/>
+    <padding android:left="12dp" android:right="12dp" android:top="8dp" android:bottom="8dp"/>
+
+    <stroke android:width="2dp" android:color="#FFD54F"/> <!-- Borde más claro -->
+</shape>
