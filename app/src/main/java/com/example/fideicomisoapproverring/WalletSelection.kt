@@ -37,6 +37,8 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) :
         private const val MAX_TIMESTAMP_DIFF = 5 * 60 * 1000 // 5 minutes
     }
 
+    data class WalletOption(val name: String, val iconRes: Int, val isAvailable: Boolean)
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -285,9 +287,6 @@ class WalletSelection(private val onWalletSelected: (String) -> Unit) :
                 .show()
         }
     }
-
-
-    data class WalletOption(val name: String, val iconRes: Int, val isAvailable: Boolean)
 }
 
 

@@ -29,10 +29,6 @@
         <item name="android:background">#4A4458</item>
     </style>
 
-    <style name="MyButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="android:backgroundTint">#4A4458</item>
-    </style>
-
     <style name="ThemeOverlay.AppTheme.TextInputEditText.Outlined" parent="">
         <item name="colorControlActivated">#D0BCFE</item>
     </style>
