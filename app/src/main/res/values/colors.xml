@@ -8,4 +8,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#fff</color>
+    <color name="soil_brown">#5D4037</color>
+    <color name="wheat_gold">#F9C74F</color>
+    <color name="leaf_green">#43A047</color>
+    <color name="sky_blue">#90CAF9</color>
+    <color name="background_dark">#1E1B24</color>
+    <color name="text_primary">#E6E1E5</color>
+    <color name="text_secondary">#CAC4D0</color>
+    <color name="neutro">#0D0D0D</color>
 </resources>
