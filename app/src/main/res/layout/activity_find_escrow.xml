@@ -19,10 +19,15 @@
         android:gravity="center"
         android:visibility="gone">
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true" />
+        <!-- Lottie Animation -->
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottieLoading"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            app:lottie_rawRes="@raw/plant"
+            app:lottie_loop="true"
+            app:lottie_autoPlay="true"/>
     </LinearLayout>
 
     <!-- Form -->
