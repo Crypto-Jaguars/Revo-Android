@@ -18,11 +18,13 @@ lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.0"
 composeBom = "2025.01.01"
 composeConstraintLayout = "1.1.0"
+kotlinComposeCompilerVersion = "1.5.15"
 appcompat = "1.7.0"
-googleFonts = "1.7.6"
+googleFonts = "1.7.7"
+swipeRefreshVersion = "1.2.0-alpha01"
 material = "1.12.0"
 activity = "1.10.0"
-navigation = "2.8.5"
+navigation = "2.8.6"
 mockitoCore = "5.12.0"
 mockitoKotlin = "5.3.1"
 multidex = "2.0.1"
@@ -31,6 +33,7 @@ ringofringssdk = "1.1.0"
 ringofringssdkVersion = "1.1.0"
 robolectric = "4.12.2"
 runner = "1.6.2"
+shimmer = "0.5.0"
 squareupOkhttp = "4.12.0"
 walletSdk = "1.2.0"
 identityJvm = "202411.1"
@@ -39,6 +42,7 @@ encryptionVersion = "1.1.0-alpha06"
 dataStoreVersion = "1.1.2"
 bouncyCastleVersion = "1.78.1"
 javaStellarSDKVersion = "0.43.0"
+glideVersion = "4.15.1"
 
 [libraries]
 google-font = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "googleFonts" }
@@ -59,6 +63,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-swipe-refresh-layout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swipeRefreshVersion" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -83,16 +88,24 @@ mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 ringofringssdk = { module = "com.ringofrings:ringofringssdk", version.ref = "ringofringssdk" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+shimmer = { group = "com.facebook.shimmer", name = "shimmer", version.ref = "shimmer" }
 squareup-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "squareupOkhttp" }
-wallet-sdk = { module = "org.stellar:wallet-sdk", version.ref = "walletSdk" }
-lottie = { module = "com.airbnb.android:lottie", version.ref = "lottieVersion" }
+wallet-sdk = { group = "org.stellar", name = "wallet-sdk",version.ref = "walletSdk" }
+lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottieVersion" }
 identity-jvm = { group = "com.android.identity", name = "identity-jvm", version.ref = "identityJvm" }
-datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStoreVersion" }
-androidx-encryption = { module = "androidx.security:security-crypto", version.ref = "encryptionVersion" }
-bouncy-castle = { module = "org.bouncycastle:bcprov-jdk18on", version = "bouncyCastleVersion" }
-java-stellar-sdk = {module = "com.github.stellar:java-stellar-sdk", version = "javaStellarSDKVersion"}
+datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStoreVersion" }
+androidx-encryption = { group = "androidx.security", name = "security-crypto", version.ref = "encryptionVersion" }
+bouncy-castle = { group = "org.bouncycastle", name = "bcprov-jdk18on", version = "bouncyCastleVersion" }
+java-stellar-sdk = { group = "com.github.stellar", name = "java-stellar-sdk", version.ref = "javaStellarSDKVersion"}
+bumptech-glide-glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glideVersion" }
+bumptech-glide-annotations = { group = "com.github.bumptech.glide", name = "annotations", version.ref = "glideVersion" }
+bumptech-glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glideVersion" }
+bumptech-glide-okhttp3 = { group = "com.github.bumptech.glide", name = "okhttp3-integration", version.ref = "glideVersion" }
+
 
 [plugins]
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize",  version.ref = "kotlin"  }

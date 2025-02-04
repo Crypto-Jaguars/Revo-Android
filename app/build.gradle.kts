@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
@@ -46,7 +48,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
+        kotlinCompilerExtensionVersion = libs.versions.kotlinComposeCompilerVersion.get()
     }
 
     packaging {
@@ -95,12 +97,15 @@ dependencies {
     implementation(libs.squareup.okhttp)
     implementation(libs.json)
 
+    implementation(libs.androidx.swipe.refresh.layout)
+
     implementation(libs.material)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
+
     // Navigation
     implementation(libs.androidx.ui.compose.navigation)
     implementation(libs.androidx.ui)
@@ -108,6 +113,13 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
+
+    implementation(libs.bumptech.glide.glide)
+    implementation(libs.bumptech.glide.annotations)
+    kapt(libs.bumptech.glide.compiler)
+    implementation(libs.bumptech.glide.okhttp3)
+
+    implementation(libs.shimmer)
 
     implementation(libs.lottie)
     implementation(libs.androidx.encryption)

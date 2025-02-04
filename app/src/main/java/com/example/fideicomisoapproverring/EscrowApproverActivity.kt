@@ -88,6 +88,16 @@ class EscrowApproverActivity : AppCompatActivity() {
         }
     }
 
+    private fun showWalletSelectionDialog() {
+        val walletSelectionDialog = WalletSelection { walletName ->
+            Toast.makeText(this, "Selected wallet: $walletName", Toast.LENGTH_SHORT).show()
+            if (walletName == "LOBSTR") {
+                // If LOBSTR is selected, it is automatically redirected from WalletSelection
+            }
+        }
+        walletSelectionDialog.show(supportFragmentManager, "WalletSelection")
+    }
+
     private fun validatePublicKey(publicKey: String) {
         val url = "https://horizon-testnet.stellar.org/accounts/$publicKey"
         val client = OkHttpClient()
