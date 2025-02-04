@@ -5,13 +5,10 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.fideicomisoapproverring.ui.theme.FideicomisoApproverRingTheme
-import com.ringofrings.sdk.core.nfc.RingOfRingsNFC as RingOfRingsNFC;
-import com.ringofrings.sdk.core.mfa.RingOfRingsMFA as RingOfRingsMFA;
-import com.ringofrings.ringofrings.core.utils.crypto.CryptoUtil.Companion as RingOfRingsSDK;
+import com.ringofrings.ringofrings.core.utils.crypto.CryptoUtil.Companion as RingOfRingsSDK
+import com.ringofrings.sdk.core.nfc.RingOfRingsNFC as RingOfRingsNFC
 
 class EngagementActivity : AppCompatActivity() {
-
     private lateinit var txtOutput: TextView
     private lateinit var btnInitNFC: Button
     private lateinit var btnScanTag: Button
@@ -56,7 +53,7 @@ class EngagementActivity : AppCompatActivity() {
             val mfaData = "datoMFAEncriptado" // Datos MFA encriptados reales
             val index = 0
 //            val isMFAInitialized = RingOfRingsMFA.initializeRingOfRingsMFA(index, mfaData)
-            val isMFAInitialized = true;
+            val isMFAInitialized = true
             if (isMFAInitialized) {
                 txtOutput.text = "MFA inicializado correctamente"
             } else {

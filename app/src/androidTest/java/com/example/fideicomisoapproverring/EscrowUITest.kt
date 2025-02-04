@@ -12,7 +12,6 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class EscrowUITest {
-
     @get:Rule
     val activityRule = ActivityScenarioRule(FindEscrowActivity::class.java)
 
@@ -21,7 +20,7 @@ class EscrowUITest {
         // Input test data
         onView(withId(R.id.engagementIdInput))
             .perform(typeText("TEST123"), closeSoftKeyboard())
-        
+
         onView(withId(R.id.contractIdInput))
             .perform(typeText("CONTRACT123"), closeSoftKeyboard())
 
@@ -39,7 +38,7 @@ class EscrowUITest {
         // Input test data and search
         onView(withId(R.id.engagementIdInput))
             .perform(typeText("TEST123"), closeSoftKeyboard())
-        
+
         onView(withId(R.id.contractIdInput))
             .perform(typeText("CONTRACT123"), closeSoftKeyboard())
 
@@ -50,4 +49,4 @@ class EscrowUITest {
         onView(withId(R.id.resultFrame))
             .check(matches(isDisplayed()))
     }
-} 
+}

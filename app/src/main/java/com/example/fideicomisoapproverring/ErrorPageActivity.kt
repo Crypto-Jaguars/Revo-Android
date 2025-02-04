@@ -29,7 +29,7 @@ class ErrorPageActivity : AppCompatActivity() {
         overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
         
         // Setup background gradient
-        window.decorView.setBackgroundResource(R.drawable.farming_gradient_background)
+        window.decorView.setBackgroundResource(R.drawable.farm_gradient_background)
         
         val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
         findViewById<ConstraintLayout>(R.id.errorPageLayout).startAnimation(fadeIn)

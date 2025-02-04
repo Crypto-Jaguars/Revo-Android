@@ -3,6 +3,7 @@ package com.example.fideicomisoapproverring
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -12,6 +13,12 @@ import com.example.fideicomisoapproverring.security.SecureWalletSessionManager
 import com.example.fideicomisoapproverring.security.SessionData
 import okhttp3.*
 import java.io.IOException
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.fideicomisoapproverring.guests.navigation.Routes
+import com.example.fideicomisoapproverring.guests.ui.views.DashboardView
+import com.example.fideicomisoapproverring.theme.ui.theme.RingCoreTheme
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,20 +29,30 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
         sessionManager = SecureWalletSessionManager(this)
         checkWalletSession()
 
-        engadmentIdInput = findViewById(R.id.engagementIdInput)
-        enterButton = findViewById(R.id.enterButton)
+        setContent {
+            val navController = rememberNavController()
 
-        enterButton.setOnClickListener {
-            val engadmentId = engadmentIdInput.text.toString()
+            NavHost(navController = navController, startDestination = Routes.Home.value) {
+                composable(route = Routes.Home.value) {
+                    RingCoreTheme(
+                        darkTheme = true,
+                    ) {
+                        DashboardView(navController = navController)
+                    }
+                }
 
-            if (engadmentId.isNotEmpty()) {
-                fetchEngagementData(engadmentId)
-            } else {
-                Toast.makeText(this, "Por favor ingresa un Engadment ID", Toast.LENGTH_SHORT).show()
+                composable(route = Routes.Wallet.value) {
+                }
+
+                composable(route = Routes.Activity.value) {
+                }
+
+                composable(route = Routes.Search.value) {
+                }
             }
         }
     }
