@@ -31,6 +31,10 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Por favor ingresa un Engadment ID", Toast.LENGTH_SHORT).show()
             }
         }
+
+        // uploadImageButton.setOnClickListener {
+        //     startActivity(Intent(this, ImagePickerActivity::class.java))
+        // }
     }
 
     private fun fetchEngagementData(engadmentId: String) {

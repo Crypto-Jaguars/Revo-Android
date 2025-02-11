@@ -8,19 +8,26 @@ import android.text.TextWatcher
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.fideicomisoapproverring.utils.ImagePickerHelper
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.button.MaterialButton
 import okhttp3.*
 import java.io.IOException
 
-class EscrowApproverActivity : AppCompatActivity() {
+class EscrowApproverActivity : AppCompatActivity(), ImagePickerBottomSheet.ImagePickerListener {
 
     private lateinit var connectButton: Button
     private lateinit var validateKeyButton: Button
     private lateinit var publicKeyInput: TextInputEditText
+    private lateinit var imagePickerHelper: ImagePickerHelper
+    private lateinit var selectImageButton: MaterialButton
+    private val selectedImages = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_escrow_approver)
+
+        imagePickerHelper = ImagePickerHelper(this)
 
         // Initialize UI elements
         connectButton = findViewById(R.id.connectButton)
@@ -36,11 +43,19 @@ class EscrowApproverActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
+        // Initialize the image picker button
+        selectImageButton = findViewById(R.id.selectImageButton)
+
+        selectImageButton.setOnClickListener {
+            if (selectedImages.size >= 10) {
+                Toast.makeText(this, "Maximum 10 images allowed", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            showImagePickerOptions()
+        }
 
         connectButton.setOnClickListener {
             showWalletSelectionDialog()
-
-
         }
 
         validateKeyButton.setOnClickListener {
@@ -78,10 +93,36 @@ class EscrowApproverActivity : AppCompatActivity() {
         walletSelectionDialog.show(supportFragmentManager, "WalletSelection")
     }
 
+    private fun showImagePickerOptions() {
+        val bottomSheet = ImagePickerBottomSheet()
+        bottomSheet.setListener(this)
+        bottomSheet.show(supportFragmentManager, "ImagePicker")
+    }
 
+    override fun onCameraSelected() {
+        imagePickerHelper.launchCamera { images ->
+            handleImages(images)
+        }
+    }
 
+    override fun onGallerySelected() {
+        imagePickerHelper.launchGallery { images ->
+            handleImages(images)
+        }
+    }
 
+    private fun handleImages(images: List<String>) {
+        selectedImages.clear()
+        selectedImages.addAll(images)
 
+        // Update UI to show selected images count
+        Toast.makeText(this, "${selectedImages.size} images selected", Toast.LENGTH_SHORT).show()
+
+        // Here you can:
+        // 1. Update a RecyclerView to show image previews
+        // 2. Store the base64 strings for later upload
+        // 3. Upload immediately to your server
+    }
 
     private fun validatePublicKey(publicKey: String) {
         val url = "https://horizon-testnet.stellar.org/accounts/$publicKey"

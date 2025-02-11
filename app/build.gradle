@@ -70,20 +70,40 @@ dependencies {
 
     def multidex_version = "2.0.1"
     implementation "androidx.multidex:multidex:$multidex_version"
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+
+    // Network
+    implementation('com.squareup.retrofit2:retrofit:2.9.0') {
+        exclude module: 'okhttp'
+    }
+    implementation('com.squareup.retrofit2:converter-gson:2.9.0') {
+        exclude module: 'okhttp'
+    }
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+
+    // Stellar with exclusions
     implementation("org.stellar:wallet-sdk:1.2.0") {
         exclude group: 'commons-codec', module: 'commons-codec'
         exclude group: 'org.jetbrains', module: 'annotations'
         exclude group: 'com.github.stellar', module: 'java-stellar-sdk'
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
     }
-    implementation 'org.stellar:wallet-sdk:1.2.0'
+
+    // Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'org.json:json:20210307'
 
+    // Keep existing AndroidX & UI dependencies...
+
+    // Image handling
+    implementation 'com.vanniktech:android-image-cropper:4.5.0'
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.15.1'
+    implementation 'androidx.exifinterface:exifinterface:1.3.6'
+
+    // Testing - consolidate OkHttp version
+    testImplementation 'com.squareup.okhttp3:okhttp:4.10.0'  // Use same version as implementation
+
+    // Keep other testing dependencies...
 
     implementation 'com.google.android.material:material:1.9.0'
     implementation libs.androidx.core.ktx
@@ -95,7 +115,6 @@ dependencies {
     implementation libs.androidx.ui.tooling.preview
     implementation libs.androidx.material3
     implementation libs.androidx.appcompat
-    implementation libs.material
     implementation libs.androidx.activity
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
@@ -106,7 +125,6 @@ dependencies {
     debugImplementation libs.androidx.ui.test.manifest
 
     implementation 'com.github.RingOfRings:RingOfRingsSDK:1.1.0'
-
 
     // Testing Dependencies
     testImplementation 'junit:junit:4.13.2'
@@ -119,10 +137,9 @@ dependencies {
     testImplementation 'org.mockito.kotlin:mockito-kotlin:5.2.1'
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
-    testImplementation 'com.squareup.okhttp3:okhttp:4.9.3'
     testImplementation 'org.robolectric:robolectric:4.10.3'
     testImplementation 'androidx.appcompat:appcompat:1.6.1'
-    
+
     // Android Testing
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
@@ -130,6 +147,27 @@ dependencies {
     androidTestImplementation 'androidx.test:rules:1.5.0'
     androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.5.1'
     androidTestImplementation 'androidx.test.espresso:espresso-intents:3.5.1'
+
+    // Remove duplicate dependencies
+    configurations.all {
+        resolutionStrategy {
+            force 'com.squareup.okhttp3:okhttp:4.10.0'
+            force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.0'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-common:1.8.0'
+        }
+    }
+
+    // Android dependencies
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.activity:activity-ktx:1.7.2'
+    implementation 'androidx.fragment:fragment-ktx:1.6.1'
+
+    // Stellar SDK
+    implementation 'com.github.stellar:java-stellar-sdk:0.43.0'
+
+    // Base64 and other Android utilities
+    implementation 'commons-codec:commons-codec:1.15'
+    implementation 'androidx.core:core-ktx:1.10.1'
 }
 
 subprojects {
