@@ -53,6 +53,12 @@
             android:exported="false" />
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat"/>
+        <activity
+            android:name=".ui.ImageEditorActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.MultipleImagesActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

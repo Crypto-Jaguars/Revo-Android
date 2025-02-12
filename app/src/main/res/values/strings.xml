@@ -4,4 +4,10 @@
     <string name="contractId">Contract ID</string>
     <string name="enterButton">Enter</string>
     <string name="escrow_approver">Escrow_Approver</string>
+    <string name="image_preview">Image Preview</string>
+    <string name="rotate">Rotate</string>
+    <string name="crop">Crop</string>
+    <string name="save">Save</string>
+    <string name="edit">Edit</string>
+    <string name="upload">Upload</string>
 </resources>

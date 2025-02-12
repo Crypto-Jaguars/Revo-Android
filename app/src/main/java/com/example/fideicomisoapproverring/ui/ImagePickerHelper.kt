@@ -3,13 +3,17 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
+import com.example.fideicomisoapproverring.ui.ImageEditorActivity
 import java.io.ByteArrayOutputStream
 import android.util.Base64
+import java.util.ArrayList
+import com.example.fideicomisoapproverring.ui.MultipleImagesActivity
 
 class ImagePickerHelper(private val activity: AppCompatActivity) {
     private var imageCallback: ((String) -> Unit)? = null
@@ -20,6 +24,9 @@ class ImagePickerHelper(private val activity: AppCompatActivity) {
                 val base64 = getBase64FromUri(uri)
                 imageCallback?.invoke(base64)
             }
+        } else {
+            val error = result.error
+            Toast.makeText(activity, "Image cropping failed: ${error?.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -43,28 +50,61 @@ class ImagePickerHelper(private val activity: AppCompatActivity) {
                 CAMERA_REQUEST_CODE -> {
                     val imageBitmap = data?.extras?.get("data") as? Bitmap
                     imageBitmap?.let { bitmap ->
-                        launchImageCropper(getImageUriFromBitmap(bitmap))
+                        val uri = getImageUriFromBitmap(bitmap)
+                        launchImageEditor(uri)
                     }
                 }
                 GALLERY_REQUEST_CODE -> {
+                    val selectedImages = ArrayList<String>()
+                    if (data?.clipData != null) {
+                        // Multiple images selected
+                        val clipData = data.clipData!!
+                        for (i in 0 until clipData.itemCount) {
+                            val uri = clipData.getItemAt(i).uri
+                            selectedImages.add(uri.toString())
+                        }
+                    } else {
+                        // Single image selected
+                        data?.data?.let { uri ->
+                            selectedImages.add(uri.toString())
+                        }
+                    }
+
+                    if (selectedImages.isNotEmpty()) {
+                        val intent = Intent(activity, MultipleImagesActivity::class.java)
+                        intent.putStringArrayListExtra("images", selectedImages)
+                        activity.startActivityForResult(intent, MULTIPLE_IMAGES_REQUEST_CODE)
+                    }
+                }
+                ImageEditorActivity.REQUEST_CODE_IMAGE_EDIT -> {
                     data?.data?.let { uri ->
-                        launchImageCropper(uri)
+                        // Launch cropper directly after editing
+                        val cropOptions = CropImageContractOptions(
+                            uri,
+                            CropImageOptions().apply {
+                                guidelines = CropImageView.Guidelines.ON
+                                aspectRatioX = 1
+                                aspectRatioY = 1
+                                outputCompressFormat = Bitmap.CompressFormat.JPEG
+                                outputCompressQuality = 90
+                            }
+                        )
+                        cropImage.launch(cropOptions)
+                    } ?: run {
+                        Toast.makeText(activity, "Failed to get edited image", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            Toast.makeText(activity, "Image selection cancelled", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun launchImageCropper(sourceUri: Uri) {
-        val cropOptions = CropImageContractOptions(
-            sourceUri,
-            CropImageOptions().apply {
-                guidelines = CropImageView.Guidelines.ON
-                aspectRatioX = 1
-                aspectRatioY = 1
-            }
-        )
-        cropImage.launch(cropOptions)
+    private fun launchImageEditor(uri: Uri) {
+        val intent = Intent(activity, ImageEditorActivity::class.java).apply {
+            putExtra("imageUri", uri)
+        }
+        activity.startActivityForResult(intent, ImageEditorActivity.REQUEST_CODE_IMAGE_EDIT)
     }
 
     private fun getImageUriFromBitmap(bitmap: Bitmap): Uri {
@@ -83,5 +123,6 @@ class ImagePickerHelper(private val activity: AppCompatActivity) {
     companion object {
         private const val CAMERA_REQUEST_CODE = 1001
         private const val GALLERY_REQUEST_CODE = 1002
+        private const val MULTIPLE_IMAGES_REQUEST_CODE = 1003
     }
 }
