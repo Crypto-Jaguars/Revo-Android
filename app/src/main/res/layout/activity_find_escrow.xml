@@ -19,10 +19,15 @@
         android:gravity="center"
         android:visibility="gone">
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true" />
+        <!-- Lottie Animation -->
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottieLoading"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            app:lottie_rawRes="@raw/plant"
+            app:lottie_loop="true"
+            app:lottie_autoPlay="true"/>
     </LinearLayout>
 
     <!-- Form -->
@@ -139,5 +144,40 @@
             android:textColor="@android:color/white"
             android:textSize="18sp"
             android:visibility="gone" />
+
+        <RelativeLayout
+            android:id="@+id/statusBanner"
+            android:layout_width="343dp"
+            android:layout_height="82dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="24dp"
+            android:background="@drawable/toast_success"
+            android:elevation="10dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:id="@+id/statusIcon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="16dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/check" />
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/statusIcon"
+                android:layout_marginStart="12dp"
+                android:layout_centerVertical="true"
+                android:text="Connection Successfully"
+                android:textSize="17sp"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif-medium" />
+        </RelativeLayout>
+
     </LinearLayout>
 </LinearLayout>

@@ -7,9 +7,9 @@ import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Assert.*
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
@@ -17,13 +17,13 @@ import org.robolectric.annotation.Config
     manifest = "AndroidManifest.xml",
     sdk = [33],
     application = TestApplication::class,
-    packageName = "com.example.fideicomisoapproverring"
+    packageName = "com.example.fideicomisoapproverring",
 )
 class EscrowDetailsActivityTest {
-
     @Test
     fun testEscrowDataDisplay() {
-        val testData = """
+        val testData =
+            """
             {
                 "description": "Test Description",
                 "issuer": "TestIssuer",
@@ -32,12 +32,13 @@ class EscrowDetailsActivityTest {
                 "amount": "100",
                 "balance": "50"
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val intent = Intent(ApplicationProvider.getApplicationContext(), EscrowDetailsActivity::class.java).apply {
-            putExtra("escrowData", testData)
-            putExtra("engagementID", "TEST123")
-        }
+        val intent =
+            Intent(ApplicationProvider.getApplicationContext(), EscrowDetailsActivity::class.java).apply {
+                putExtra("escrowData", testData)
+                putExtra("engagementID", "TEST123")
+            }
 
         ActivityScenario.launch<EscrowDetailsActivity>(intent).use { scenario ->
             scenario.onActivity { activity ->
@@ -50,9 +51,10 @@ class EscrowDetailsActivityTest {
 
     @Test
     fun testNoDataDisplay() {
-        val intent = Intent(ApplicationProvider.getApplicationContext(), EscrowDetailsActivity::class.java).apply {
-            putExtra("engagementID", "TEST123")
-        }
+        val intent =
+            Intent(ApplicationProvider.getApplicationContext(), EscrowDetailsActivity::class.java).apply {
+                putExtra("engagementID", "TEST123")
+            }
 
         ActivityScenario.launch<EscrowDetailsActivity>(intent).use { scenario ->
             scenario.onActivity { activity ->
@@ -61,4 +63,4 @@ class EscrowDetailsActivityTest {
             }
         }
     }
-} 
+}

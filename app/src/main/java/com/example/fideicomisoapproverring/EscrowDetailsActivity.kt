@@ -13,7 +13,6 @@ import androidx.core.text.bold
 import org.json.JSONObject
 
 class EscrowDetailsActivity : AppCompatActivity() {
-
     private lateinit var btnFund: Button
     private lateinit var btnBack: Button
     private lateinit var engagementTitle: TextView
@@ -51,13 +50,18 @@ class EscrowDetailsActivity : AppCompatActivity() {
 
         setTitle(title)
 
-        if(escrowData != null) {
+        if (escrowData != null) {
             val data = JSONObject(escrowData)
 
             description.text = data.get("description").toString()
             issuer.text = SpannableStringBuilder().bold { append("Issuer: ") }.append(data.get("issuer").toString())
             signer.text = SpannableStringBuilder().bold { append("Signer: ") }.append(data.get("signer").toString())
-            serviceProvider.text = SpannableStringBuilder().bold { append("Service Provider: ") }.append(data.get("serviceProvider").toString())
+            serviceProvider.text =
+                SpannableStringBuilder().bold {
+                    append(
+                        "Service Provider: ",
+                    )
+                }.append(data.get("serviceProvider").toString())
             amount.text = SpannableStringBuilder().bold { append("Amount: ") }.append(data.get("amount").toString())
             balance.text = SpannableStringBuilder().bold { append("Balance: ") }.append(data.get("balance").toString())
 
