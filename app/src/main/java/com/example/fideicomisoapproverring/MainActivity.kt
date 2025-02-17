@@ -16,9 +16,10 @@ import java.io.IOException
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.fideicomisoapproverring.guests.navigation.Routes
-import com.example.fideicomisoapproverring.guests.ui.views.DashboardView
-import com.example.fideicomisoapproverring.theme.ui.theme.RingCoreTheme
+import com.example.onboarding.guests.navigation.Routes
+import com.example.onboarding.guests.ui.views.DashboardView
+import com.example.onboarding.theme.ui.theme.RingCoreTheme
+
 
 class MainActivity : AppCompatActivity() {
 
