@@ -43,6 +43,7 @@ dataStoreVersion = "1.1.2"
 bouncyCastleVersion = "1.78.1"
 javaStellarSDKVersion = "0.43.0"
 glideVersion = "4.15.1"
+navigationCompose = "2.8.7"
 
 [libraries]
 google-font = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "googleFonts" }
@@ -101,6 +102,7 @@ bumptech-glide-glide = { group = "com.github.bumptech.glide", name = "glide", ve
 bumptech-glide-annotations = { group = "com.github.bumptech.glide", name = "annotations", version.ref = "glideVersion" }
 bumptech-glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glideVersion" }
 bumptech-glide-okhttp3 = { group = "com.github.bumptech.glide", name = "okhttp3-integration", version.ref = "glideVersion" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 
 [plugins]

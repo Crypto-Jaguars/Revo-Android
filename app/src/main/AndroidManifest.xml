@@ -13,6 +13,9 @@
         </intent>
     </queries>
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
     <application
         tools:replace="android:theme"
         android:allowBackup="true"
@@ -67,6 +70,17 @@
             android:name=".ErrorPageActivity"
             android:exported="false"
             android:theme="@style/Theme.FideicomisoApproverRing" />
-    </application>
+        <activity
+            android:name=".ImagePickerActivity"
+            android:exported="false" />
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat"/>
+        <activity
+            android:name=".ui.ImageEditorActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.MultipleImagesActivity"
+            android:exported="false" />
+</application>
 
 </manifest>
