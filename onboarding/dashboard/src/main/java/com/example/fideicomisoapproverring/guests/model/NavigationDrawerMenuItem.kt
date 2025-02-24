@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.fideicomisoapproverring.dashboard.R
 import com.example.fideicomisoapproverring.guests.navigation.Routes
@@ -30,6 +31,7 @@ data class NavigationDrawerMenuItem(
                 NavigationDrawerMenuItem(icon = null, title = R.string.label_how_it_works, route = Routes.How.value),
                 NavigationDrawerMenuItem(icon = RingCore.IcFaq, title = R.string.label_faq_help_centre, route = Routes.FAQ.value),
                 NavigationDrawerMenuItem(icon = RingCore.IcAbout, title = R.string.label_about_us, route = Routes.About.value),
+                NavigationDrawerMenuItem(icon = Icons.Outlined.Add, title = R.string.upload_product, route = Routes.ImageUpload.value),
             )
     }
 }
