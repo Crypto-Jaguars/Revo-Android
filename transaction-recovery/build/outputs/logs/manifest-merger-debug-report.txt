@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/macbookpro/Revo-Android/transaction-recovery/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest18446257941655462518.xml:2:13-83
+INJECTED from /Users/macbookpro/Revo-Android/transaction-recovery/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest18446257941655462518.xml:2:13-83
+	package
+		INJECTED from /Users/macbookpro/Revo-Android/transaction-recovery/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest18446257941655462518.xml
+	xmlns:android
+		ADDED from /Users/macbookpro/Revo-Android/transaction-recovery/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest18446257941655462518.xml:2:23-81
+uses-sdk
+INJECTED from /Users/macbookpro/Revo-Android/transaction-recovery/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest18446257941655462518.xml reason: use-sdk injection requested
+INJECTED from /Users/macbookpro/Revo-Android/transaction-recovery/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest18446257941655462518.xml
+INJECTED from /Users/macbookpro/Revo-Android/transaction-recovery/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest18446257941655462518.xml
+	android:targetSdkVersion
+		INJECTED from /Users/macbookpro/Revo-Android/transaction-recovery/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest18446257941655462518.xml
+	android:minSdkVersion
+		INJECTED from /Users/macbookpro/Revo-Android/transaction-recovery/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest18446257941655462518.xml
