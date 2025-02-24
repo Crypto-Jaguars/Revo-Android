@@ -26,42 +26,49 @@ sealed class TransactionError(
     data class NetworkCongestionError(
         override val transactionId: String,
         override val message: String,
-        val retryAfter: Long,
-        val networkLatency: Long,
-        val congestionLevel: CongestionLevel
+        override val timestamp: Instant,
+        override val severity: ErrorSeverity = ErrorSeverity.MEDIUM,
+        override val recoverable: Boolean = true,
+        val retryAfter: Long? = null
     ) : TransactionError(transactionId, message, ErrorSeverity.MEDIUM)
 
     data class InsufficientFundsError(
         override val transactionId: String,
         override val message: String,
+        override val timestamp: Instant,
+        override val severity: ErrorSeverity = ErrorSeverity.HIGH,
+        override val recoverable: Boolean = true,
         val requiredAmount: String,
-        val availableAmount: String,
-        val currency: String = "XLM"
+        val availableAmount: String
     ) : TransactionError(transactionId, message)
 
     data class SmartContractError(
         override val transactionId: String,
         override val message: String,
+        override val timestamp: Instant,
+        override val severity: ErrorSeverity = ErrorSeverity.CRITICAL,
+        override val recoverable: Boolean = false,
         val contractAddress: String,
-        val errorCode: String,
-        val functionName: String,
-        val parameters: Map<String, String> = emptyMap()
+        val errorCode: String
     ) : TransactionError(transactionId, message)
 
     data class WalletConnectionError(
         override val transactionId: String,
         override val message: String,
-        val lastConnectedTimestamp: Long?,
-        val connectionAttempts: Int,
-        val walletType: String
+        override val timestamp: Instant,
+        override val severity: ErrorSeverity = ErrorSeverity.HIGH,
+        override val recoverable: Boolean = true,
+        val walletAddress: String
     ) : TransactionError(transactionId, message, ErrorSeverity.MEDIUM)
 
     data class EscrowError(
         override val transactionId: String,
         override val message: String,
-        val escrowContractAddress: String,
-        val escrowState: String,
-        val participantAddresses: List<String>
+        override val timestamp: Instant,
+        override val severity: ErrorSeverity = ErrorSeverity.HIGH,
+        override val recoverable: Boolean = true,
+        val escrowId: String,
+        val escrowState: String
     ) : TransactionError(transactionId, message)
 
     data class BlockchainError(
@@ -79,11 +86,32 @@ sealed class TransactionError(
         val operationType: String
     ) : TransactionError(transactionId, message, ErrorSeverity.MEDIUM)
 
+    data class MaxRetriesExceeded(
+        override val transactionId: String,
+        override val message: String,
+        override val timestamp: Instant,
+        override val severity: ErrorSeverity = ErrorSeverity.HIGH,
+        override val recoverable: Boolean = false,
+        val attemptCount: Int
+    ) : TransactionError(transactionId, message, ErrorSeverity.HIGH)
+
     data class UnknownError(
         override val transactionId: String,
         override val message: String,
-        val stackTrace: String
+        override val timestamp: Instant,
+        override val severity: ErrorSeverity = ErrorSeverity.HIGH,
+        override val recoverable: Boolean = false
     ) : TransactionError(transactionId, message, ErrorSeverity.CRITICAL, false)
+
+    companion object {
+        fun fromException(e: Throwable, transactionId: String): TransactionError {
+            return UnknownError(
+                transactionId = transactionId,
+                message = e.message ?: "Unknown error occurred",
+                timestamp = Instant.now()
+            )
+        }
+    }
 }
 
 /**
