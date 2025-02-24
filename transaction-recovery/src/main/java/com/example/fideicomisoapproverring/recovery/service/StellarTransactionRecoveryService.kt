@@ -16,13 +16,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.pow
 
-enum class RecoveryStatus {
-    RETRYING,
-    MANUAL_INTERVENTION_REQUIRED,
-    RECOVERED,
-    FAILED
-}
-
 @Singleton
 class StellarTransactionRecoveryService @Inject constructor(
     private val transactionManager: StellarTransactionManager,

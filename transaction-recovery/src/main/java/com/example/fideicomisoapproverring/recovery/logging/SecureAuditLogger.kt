@@ -8,6 +8,21 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class AuditLogEntry(
+    val timestamp: Long,
+    val type: LogEntryType,
+    val errorId: String,
+    val transactionId: String,
+    val message: String,
+    val hash: String
+)
+
+enum class LogEntryType {
+    ERROR,
+    RECOVERY,
+    MANUAL_INTERVENTION
+}
+
 @Singleton
 class SecureAuditLogger @Inject constructor() {
     private val logEntries = Collections.synchronizedList(mutableListOf<AuditLogEntry>())
@@ -92,20 +107,5 @@ class SecureAuditLogger @Inject constructor() {
         val digest = MessageDigest.getInstance("SHA-256")
         val hash = digest.digest(data.toByteArray())
         return hash.joinToString("") { "%02x".format(it) }
-    }
-    
-    data class AuditLogEntry(
-        val timestamp: Long,
-        val type: LogEntryType,
-        val errorId: String,
-        val transactionId: String,
-        val message: String,
-        val hash: String
-    )
-    
-    enum class LogEntryType {
-        ERROR,
-        RECOVERY,
-        MANUAL_INTERVENTION
     }
 } 

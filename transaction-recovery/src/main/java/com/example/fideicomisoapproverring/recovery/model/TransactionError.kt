@@ -1,64 +1,110 @@
 package com.example.fideicomisoapproverring.recovery.model
 
-import java.util.UUID
+import java.time.Instant
+
+/**
+ * Base interface for all transaction errors in the Revolutionary Farmers marketplace.
+ * This provides a common structure for error handling and analysis.
+ */
+interface TransactionError {
+    val message: String
+    val timestamp: Instant
+    val severity: ErrorSeverity
+    val recoverable: Boolean
+}
 
 /**
  * Represents a transaction error in the Revolutionary Farmers marketplace.
+ * This sealed class hierarchy provides comprehensive error categorization and tracking.
  */
 sealed class TransactionError(
-    val id: String,
-    val transactionId: String,
-    val message: String,
-    val timestamp: Long = System.currentTimeMillis()
-)
+    open val transactionId: String,
+    open val message: String,
+    val severity: ErrorSeverity = ErrorSeverity.HIGH,
+    val recoverable: Boolean = true
+) {
+    data class NetworkCongestionError(
+        override val transactionId: String,
+        override val message: String,
+        val retryAfter: Long,
+        val networkLatency: Long,
+        val congestionLevel: CongestionLevel
+    ) : TransactionError(transactionId, message, ErrorSeverity.MEDIUM)
 
-class NetworkCongestionError(
-    id: String,
-    transactionId: String,
-    message: String
-) : TransactionError(id, transactionId, message)
+    data class InsufficientFundsError(
+        override val transactionId: String,
+        override val message: String,
+        val requiredAmount: String,
+        val availableAmount: String,
+        val currency: String = "XLM"
+    ) : TransactionError(transactionId, message)
 
-class InsufficientFundsError(
-    id: String,
-    transactionId: String,
-    message: String
-) : TransactionError(id, transactionId, message)
+    data class SmartContractError(
+        override val transactionId: String,
+        override val message: String,
+        val contractAddress: String,
+        val errorCode: String,
+        val functionName: String,
+        val parameters: Map<String, String> = emptyMap()
+    ) : TransactionError(transactionId, message)
 
-class SmartContractError(
-    id: String,
-    transactionId: String,
-    message: String
-) : TransactionError(id, transactionId, message)
+    data class WalletConnectionError(
+        override val transactionId: String,
+        override val message: String,
+        val lastConnectedTimestamp: Long?,
+        val connectionAttempts: Int,
+        val walletType: String
+    ) : TransactionError(transactionId, message, ErrorSeverity.MEDIUM)
 
-class WalletConnectionError(
-    id: String,
-    transactionId: String,
-    message: String
-) : TransactionError(id, transactionId, message)
+    data class EscrowError(
+        override val transactionId: String,
+        override val message: String,
+        val escrowContractAddress: String,
+        val escrowState: String,
+        val participantAddresses: List<String>
+    ) : TransactionError(transactionId, message)
 
-class EscrowVerificationError(
-    id: String,
-    transactionId: String,
-    message: String
-) : TransactionError(id, transactionId, message)
+    data class BlockchainError(
+        override val transactionId: String,
+        override val message: String,
+        val blockHeight: Long,
+        val gasPrice: String?,
+        val nonce: Long?
+    ) : TransactionError(transactionId, message)
 
-class SystemSynchronizationError(
-    id: String,
-    transactionId: String,
-    message: String
-) : TransactionError(id, transactionId, message)
+    data class TimeoutError(
+        override val transactionId: String,
+        override val message: String,
+        val timeoutDuration: Long,
+        val operationType: String
+    ) : TransactionError(transactionId, message, ErrorSeverity.MEDIUM)
 
-class UnknownError(
-    id: String,
-    transactionId: String,
-    message: String
-) : TransactionError(id, transactionId, message)
+    data class UnknownError(
+        override val transactionId: String,
+        override val message: String,
+        val stackTrace: String
+    ) : TransactionError(transactionId, message, ErrorSeverity.CRITICAL, false)
+}
 
-class RecoveredError(
-    id: String,
-    transactionId: String,
-    message: String
-) : TransactionError(id, transactionId, message)
+/**
+ * Severity levels for error classification
+ */
+enum class ErrorSeverity {
+    LOW,
+    MEDIUM,
+    HIGH,
+    CRITICAL
+}
+
+/**
+ * Network congestion levels
+ */
+enum class CongestionLevel {
+    LOW,
+    MEDIUM,
+    HIGH,
+    CRITICAL
+}
 
 /**
  * Categorizes different types of transaction errors.
