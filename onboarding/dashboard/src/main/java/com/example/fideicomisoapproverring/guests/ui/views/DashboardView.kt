@@ -5,53 +5,13 @@ import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -65,20 +25,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
+import androidx.constraintlayout.compose.layoutId
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.fideicomisoapproverring.dashboard.R
-import com.example.fideicomisoapproverring.guests.model.AgriculturalProduct
-import com.example.fideicomisoapproverring.guests.model.BottomNavigationItem
-import com.example.fideicomisoapproverring.guests.model.NavigationDrawerMenuItem
+import com.example.fideicomisoapproverring.guests.model.*
 import com.example.fideicomisoapproverring.guests.navigation.Routes
 import com.example.fideicomisoapproverring.theme.icons.RingCore
-import com.example.fideicomisoapproverring.theme.icons.ringcore.IcArrowTopRight
-import com.example.fideicomisoapproverring.theme.icons.ringcore.IcUpwardTrend
-import com.example.fideicomisoapproverring.theme.icons.ringcore.IcWallet
+import com.example.fideicomisoapproverring.theme.icons.ringcore.*
 import com.example.fideicomisoapproverring.theme.ui.theme.RingCoreTheme
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -91,176 +50,156 @@ fun DashboardView(
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     onViewAllProducts: () -> Unit = {},
     onAuthenticate: () -> Unit = {},
-    onMenuClick: (String) -> Unit = {},
+    onMenuClick: (String) -> Unit = {}
 ) {
-    var openAlertDialog = remember { mutableStateOf(false) }
-
+    val openAlertDialog = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier.wrapContentSize(),
-                drawerShape = MaterialTheme.shapes.small,
+                drawerShape = MaterialTheme.shapes.small
             ) {
                 ModalDrawerContentView(
                     menus = NavigationDrawerMenuItem.defaultMenus,
-                    onMenuClick = onMenuClick,
+                    onMenuClick = onMenuClick
                 )
             }
-        },
+        }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             BackgroundView()
+            
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        colors =
-                            TopAppBarDefaults.topAppBarColors(
-                                containerColor =
-                                    MaterialTheme.colorScheme.primaryContainer.copy(
-                                        alpha = 0.1F,
-                                    ),
-                                titleContentColor = MaterialTheme.colorScheme.onBackground,
-                            ),
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
+                            titleContentColor = MaterialTheme.colorScheme.onBackground
+                        ),
                         navigationIcon = {
-                            IconButton(onClick = {
-                                coroutineScope.launch {
-                                    if (drawerState.isClosed) {
-                                        drawerState.open()
-                                    } else {
-                                        drawerState.close()
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        if (drawerState.isClosed) drawerState.open()
+                                        else drawerState.close()
                                     }
                                 }
-                            }) {
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Menu,
                                     tint = MaterialTheme.colorScheme.onBackground,
-                                    contentDescription = null,
+                                    contentDescription = null
                                 )
                             }
                         },
                         title = {
                             Text(
                                 text = stringResource(R.string.title_market_place),
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.Bold
                             )
-                        },
+                        }
                     )
                 },
                 bottomBar = {
                     NavigationBar(
-                        containerColor = NavigationBarDefaults.containerColor.copy(alpha = 0.25F),
+                        containerColor = NavigationBarDefaults.containerColor.copy(alpha = 0.25f)
                     ) {
                         val navBackStackEntry = navController.currentBackStackEntryAsState()
                         val currentDestination = navBackStackEntry.value?.destination
+                        
                         BottomNavigationItem.values().forEach { item ->
                             NavigationBarItem(
                                 icon = {
                                     Icon(
                                         modifier = Modifier.size(24.dp),
                                         imageVector = item.icon,
-                                        contentDescription = stringResource(item.label),
+                                        contentDescription = stringResource(item.label)
                                     )
                                 },
                                 label = { Text(text = stringResource(item.label)) },
-                                selected =
-                                    currentDestination?.hierarchy?.any {
-                                        it.hasRoute(
-                                            item.route,
-                                            null,
-                                        )
-                                    } == true,
+                                selected = currentDestination?.hierarchy?.any { 
+                                    it.hasRoute(item.route, null) 
+                                } == true,
                                 onClick = {
-                                    // TODO: Remove conditional clause when stubbed screens have been built
                                     if (item.route != Routes.Home.value) {
                                         openAlertDialog.value = true
                                     } else {
                                         navController.navigate(item.route) {
-                                            // Pop up to the start destination of the graph to
-                                            // avoid building up a large stack of destinations
-                                            // on the back stack as users select items
                                             popUpTo(navController.graph.findStartDestination().id) {
                                                 saveState = true
                                             }
-                                            // Avoid multiple copies of the same destination when
-                                            // re-selecting the same item
                                             launchSingleTop = true
-                                            // Restore state when re-selecting a previously selected item
                                             restoreState = true
                                         }
                                     }
-                                },
+                                }
                             )
                         }
                     }
                 },
-                containerColor = Color.Transparent,
+                containerColor = Color.Transparent
             ) { contentPadding ->
                 Column(
-                    modifier =
-                        Modifier
-                            .wrapContentHeight()
-                            .padding(contentPadding)
-                            .padding(horizontal = 8.dp)
-                            .verticalScroll(state = rememberScrollState()),
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .padding(contentPadding)
+                        .padding(horizontal = 8.dp)
+                        .verticalScroll(state = rememberScrollState())
                 ) {
                     Spacer(modifier = Modifier.height(24.dp))
-
+                    
                     HeadlineBannerView(onAuthenticate = onAuthenticate)
-
+                    
                     Spacer(modifier = Modifier.height(16.dp))
-
+                    
                     TradeStatisticCardView(
                         icon = RingCore.IcUpwardTrend,
                         label = stringResource(R.string.label_market_cap),
-                        value = stringResource(R.string.currency_symbol_usd, String.format(Locale.getDefault(), "%.2f", 1820F)),
+                        value = stringResource(
+                            R.string.currency_symbol_usd,
+                            String.format(Locale.getDefault(), "%.2f", 1820f)
+                        )
                     )
-
+                    
                     Spacer(modifier = Modifier.height(8.dp))
-
+                    
                     TradeStatisticCardView(
                         icon = RingCore.IcWallet,
                         label = stringResource(R.string.label_volume_24hours),
-                        value = stringResource(R.string.currency_symbol_usd, String.format(Locale.getDefault(), "%.2f", 82000F)),
+                        value = stringResource(
+                            R.string.currency_symbol_usd,
+                            String.format(Locale.getDefault(), "%.2f", 82000f)
+                        )
                     )
-
+                    
                     Spacer(modifier = Modifier.height(8.dp))
-
+                    
                     TradeStatisticCardView(
                         icon = RingCore.IcWallet,
                         label = stringResource(R.string.label_active_traders),
-                        value = stringResource(R.string.currency_symbol_usd, String.format(Locale.getDefault(), "%.2f", 2400000F)),
+                        value = stringResource(
+                            R.string.currency_symbol_usd,
+                            String.format(Locale.getDefault(), "%.2f", 2400000f)
+                        )
                     )
-
+                    
                     Spacer(modifier = Modifier.height(32.dp))
-
+                    
                     AuthenticateWalletCardView(onAuthenticate = onAuthenticate)
-
+                    
                     Spacer(modifier = Modifier.height(32.dp))
-
+                    
                     Text(
                         text = stringResource(R.string.title_trending_products),
-                        style =
-                            MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            ),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    TrendingProductsView(onViewAllProducts = onViewAllProducts)
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
-            }
-
-            if (openAlertDialog.value) {
-                ConnectWalletDialog(
-                    onDismiss = { openAlertDialog.value = false },
-                    onConfirm = { openAlertDialog.value = false },
-                )
             }
         }
     }
@@ -757,12 +696,13 @@ private fun ModalDrawerContentPreview() {
     }
 }
 
-@Preview
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_NO
+)
 @Composable
 private fun DashboardPreview() {
-    RingCoreTheme(
-        darkTheme = true,
-    ) {
+    RingCoreTheme {
         DashboardView()
     }
 }

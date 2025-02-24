@@ -30,6 +30,10 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
 }
 
 dependencies {
@@ -48,18 +52,22 @@ dependencies {
     
     // Stellar SDK
     implementation("com.github.stellar:java-stellar-sdk:0.43.0")
+    implementation("org.stellar:stellar-sdk:0.43.0")
     
     // Security
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     
     // Testing
-    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:1.9.22")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("io.mockk:mockk:1.13.9")
     testImplementation("app.cash.turbine:turbine:1.0.0")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("androidx.test:core-ktx:1.5.0")
+    testImplementation("androidx.test.ext:junit-ktx:1.1.5")
     
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

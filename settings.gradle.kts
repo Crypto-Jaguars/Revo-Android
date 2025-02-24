@@ -19,4 +19,5 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "Revo-Android"
 include(":app")
+include(":core")
 include(":transaction-recovery")

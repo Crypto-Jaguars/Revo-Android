@@ -2,36 +2,60 @@ package com.example.fideicomisoapproverring.recovery.service
 
 import com.example.fideicomisoapproverring.core.logging.SecureAuditLogger
 import com.example.fideicomisoapproverring.recovery.model.*
+import com.example.fideicomisoapproverring.recovery.util.TestCoroutineRule
 import com.example.fideicomisoapproverring.stellar.StellarTransactionManager
 import com.example.fideicomisoapproverring.core.wallet.WalletManager
-import io.mockk.*
-import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import com.example.fideicomisoapproverring.recovery.forensics.BlockchainState
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.clearAllMocks
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.stellar.sdk.responses.TransactionResponse
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@ExperimentalCoroutinesApi
+@ExtendWith(TestCoroutineRule::class)
 class TransactionVerificationServiceTest {
     private lateinit var verificationService: TransactionVerificationService
     private lateinit var stellarTransactionManager: StellarTransactionManager
     private lateinit var walletManager: WalletManager
     private lateinit var auditLogger: SecureAuditLogger
     private lateinit var mockTransaction: TransactionResponse
-    private lateinit var mockBlockchainState: StellarTransactionManager.BlockchainState
-    private lateinit var mockSmartContractState: StellarTransactionManager.SmartContractState
-    private lateinit var mockEscrowState: StellarTransactionManager.EscrowState
+    private lateinit var mockBlockchainState: BlockchainState
+    private lateinit var mockSmartContractState: SmartContractState
+    private lateinit var mockEscrowState: EscrowState
+    private lateinit var testCoroutineRule: TestCoroutineRule
 
-    @Before
-    fun setup() {
+    @BeforeEach
+    fun setup(testCoroutineRule: TestCoroutineRule) {
+        this.testCoroutineRule = testCoroutineRule
         stellarTransactionManager = mockk()
         walletManager = mockk()
         auditLogger = mockk(relaxed = true)
         mockTransaction = mockk()
-        mockBlockchainState = mockk()
-        mockSmartContractState = mockk()
-        mockEscrowState = mockk()
+        mockBlockchainState = BlockchainState(
+            lastBlockHeight = 1000L,
+            averageBlockTime = 5.0f,
+            networkCongestion = 0.5f,
+            gasPrice = "100",
+            isHealthy = true,
+            protocolVersion = 19,
+            networkUptime = 99.9f
+        )
+        mockSmartContractState = SmartContractState(
+            contractAddress = "contract_address",
+            isValid = false
+        )
+        mockEscrowState = EscrowState(
+            escrowAddress = "escrow_address",
+            isValid = false
+        )
 
         verificationService = TransactionVerificationService(
             stellarTransactionManager,
@@ -40,13 +64,13 @@ class TransactionVerificationServiceTest {
         )
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         clearAllMocks()
     }
 
     @Test
-    fun `test successful verification flow`() = runTest {
+    fun `test successful verification flow`() = testCoroutineRule.runTest {
         // Given
         val transactionId = "test_transaction"
         coEvery { stellarTransactionManager.getTransaction(any()) } returns mockTransaction
@@ -71,7 +95,7 @@ class TransactionVerificationServiceTest {
     }
 
     @Test
-    fun `test verification failure due to invalid transaction`() = runTest {
+    fun `test verification failure due to invalid transaction`() = testCoroutineRule.runTest {
         // Given
         val transactionId = "test_transaction"
         coEvery { stellarTransactionManager.getTransaction(any()) } returns mockTransaction
@@ -89,7 +113,7 @@ class TransactionVerificationServiceTest {
     }
 
     @Test
-    fun `test verification failure due to unhealthy blockchain`() = runTest {
+    fun `test verification failure due to unhealthy blockchain`() = testCoroutineRule.runTest {
         // Given
         val transactionId = "test_transaction"
         coEvery { stellarTransactionManager.getTransaction(any()) } returns mockTransaction
@@ -110,7 +134,7 @@ class TransactionVerificationServiceTest {
     }
 
     @Test
-    fun `test smart contract verification failure`() = runTest {
+    fun `test smart contract verification failure`() = testCoroutineRule.runTest {
         // Given
         val transactionId = "test_transaction"
         coEvery { stellarTransactionManager.getTransaction(any()) } returns mockTransaction
@@ -136,7 +160,7 @@ class TransactionVerificationServiceTest {
     }
 
     @Test
-    fun `test escrow verification failure`() = runTest {
+    fun `test escrow verification failure`() = testCoroutineRule.runTest {
         // Given
         val transactionId = "test_transaction"
         coEvery { stellarTransactionManager.getTransaction(any()) } returns mockTransaction
@@ -163,7 +187,7 @@ class TransactionVerificationServiceTest {
     }
 
     @Test
-    fun `test verification failure due to inconsistent state`() = runTest {
+    fun `test verification failure due to inconsistent state`() = testCoroutineRule.runTest {
         // Given
         val transactionId = "test_transaction"
         coEvery { stellarTransactionManager.getTransaction(any()) } returns mockTransaction
@@ -188,7 +212,7 @@ class TransactionVerificationServiceTest {
     }
 
     @Test
-    fun `test verification error handling`() = runTest {
+    fun `test verification error handling`() = testCoroutineRule.runTest {
         // Given
         val transactionId = "test_transaction"
         coEvery { stellarTransactionManager.getTransaction(any()) } throws RuntimeException("Network error")
@@ -202,4 +226,14 @@ class TransactionVerificationServiceTest {
         assertEquals("Verification error", (state as VerificationState.Failed).reason)
         assertEquals("Network error", state.details)
     }
-} 
+}
+
+data class SmartContractState(
+    val contractAddress: String,
+    val isValid: Boolean
+)
+
+data class EscrowState(
+    val escrowAddress: String,
+    val isValid: Boolean
+) 

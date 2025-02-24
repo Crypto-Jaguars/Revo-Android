@@ -5,10 +5,10 @@ plugins {
 
 android {
     namespace = "com.example.fideicomisoapproverring.dashboard"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
-        minSdk = 33
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -19,7 +19,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
+        kotlinCompilerExtensionVersion = libs.versions.kotlinComposeCompilerVersion.get()
     }
 
     buildTypes {
@@ -31,8 +31,12 @@ android {
             )
         }
     }
-    kotlin {
-        jvmToolchain(17)
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
@@ -45,13 +49,13 @@ dependencies {
     // Android Studio Preview support
     implementation(libs.androidx.ui.tooling.preview)
     debugImplementation(libs.androidx.ui.tooling)
+    // Compose ConstraintLayout
+    implementation(libs.androidx.ui.compose.constraintlayout)
+    // Compose ViewModel
+    implementation(libs.androidx.ui.viewmodel)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    // Optional - Constraint Layout
-    implementation(libs.androidx.ui.compose.constraintlayout)
-    // Optional - Integration with ViewModels
-    implementation(libs.androidx.ui.viewmodel)
     // Navigation
     implementation(libs.androidx.ui.compose.navigation)
     // UI Tests

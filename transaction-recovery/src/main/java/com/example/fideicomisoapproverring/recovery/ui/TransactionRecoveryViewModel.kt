@@ -102,7 +102,7 @@ class TransactionRecoveryViewModel @Inject constructor(
         currentTransactionId?.let { transactionId ->
             if (recoveryAttempts < maxRecoveryAttempts) {
                 recoveryAttempts++
-                viewModelScope.launch {
+        viewModelScope.launch {
                     try {
                         _recoveryState.value = RecoveryState.Recovering(0)
                         startRecovery(transactionId)

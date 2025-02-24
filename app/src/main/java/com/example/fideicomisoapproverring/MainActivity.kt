@@ -3,24 +3,33 @@ package com.example.fideicomisoapproverring
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.fideicomisoapproverring.ui.theme.AppTheme
+import dagger.hilt.android.AndroidEntryPoint
 import com.example.fideicomisoapproverring.security.SecureWalletSessionManager
 import com.example.fideicomisoapproverring.security.SessionData
 import okhttp3.*
 import java.io.IOException
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.fideicomisoapproverring.guests.navigation.Routes
 import com.example.fideicomisoapproverring.guests.ui.views.DashboardView
-import com.example.fideicomisoapproverring.theme.ui.theme.RingCoreTheme
+import com.example.fideicomisoapproverring.ui.screens.HomeScreen
+import com.example.fideicomisoapproverring.ui.screens.EngagementScreen
+import com.example.fideicomisoapproverring.ui.screens.EscrowScreen
 
-class MainActivity : AppCompatActivity() {
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
 
     private lateinit var engadmentIdInput: EditText
     private lateinit var enterButton: Button
@@ -34,24 +43,23 @@ class MainActivity : AppCompatActivity() {
         checkWalletSession()
 
         setContent {
-            val navController = rememberNavController()
-
-            NavHost(navController = navController, startDestination = Routes.Home.value) {
-                composable(route = Routes.Home.value) {
-                    RingCoreTheme(
-                        darkTheme = true,
-                    ) {
-                        DashboardView(navController = navController)
+            AppTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = rememberNavController()
+                    NavHost(navController = navController, startDestination = "home") {
+                        composable("home") {
+                            HomeScreen(navController)
+                        }
+                        composable("engagement") {
+                            EngagementScreen(navController)
+                        }
+                        composable("escrow") {
+                            EscrowScreen(navController)
+                        }
                     }
-                }
-
-                composable(route = Routes.Wallet.value) {
-                }
-
-                composable(route = Routes.Activity.value) {
-                }
-
-                composable(route = Routes.Search.value) {
                 }
             }
         }

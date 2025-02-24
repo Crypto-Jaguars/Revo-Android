@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.stellar.sdk.responses.TransactionResponse
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 
 /**
  * Service responsible for multi-stage verification of transactions.
@@ -23,6 +25,12 @@ class TransactionVerificationService @Inject constructor(
 ) {
     private val _verificationState = MutableStateFlow<Map<String, VerificationState>>(emptyMap())
     val verificationState: StateFlow<Map<String, VerificationState>> = _verificationState.asStateFlow()
+
+    private companion object {
+        const val VERIFICATION_TIMEOUT = 30000L
+        const val MAX_VERIFICATION_ATTEMPTS = 3
+        const val PARALLEL_VERIFICATION_BATCH_SIZE = 5
+    }
 
     suspend fun startVerification(transactionId: String) {
         try {
@@ -68,6 +76,140 @@ class TransactionVerificationService @Inject constructor(
             handleVerificationError(transactionId, e)
         }
     }
+
+    /**
+     * Optimized multi-stage verification with parallel processing
+     */
+    suspend fun startOptimizedVerification(transactionId: String) {
+        updateState(transactionId, VerificationState.InProgress(transactionId, "Starting optimized verification", 0))
+        
+        val verificationStages = listOf(
+            VerificationStage("Basic", 20) { verifyBasicTransaction(transactionId) },
+            VerificationStage("Blockchain", 40) { verifyBlockchainState(transactionId) },
+            VerificationStage("Smart Contract", 60) { verifySmartContract(transactionId) },
+            VerificationStage("Escrow", 80) { verifyEscrowState(transactionId) },
+            VerificationStage("Final", 100) { verifyFinalConsistency(transactionId) }
+        )
+
+        try {
+            val results = verificationStages.chunked(PARALLEL_VERIFICATION_BATCH_SIZE).map { batch ->
+                batch.map { stage ->
+                    async {
+                        updateState(
+                            transactionId,
+                            VerificationState.InProgress(transactionId, "${stage.name} Verification", stage.progress)
+                        )
+                        stage.verify()
+                    }
+                }.awaitAll()
+            }.flatten()
+
+            if (results.all { it }) {
+                updateState(transactionId, VerificationState.Completed(transactionId))
+            } else {
+                handleVerificationFailure(transactionId, "One or more verification stages failed")
+            }
+        } catch (e: Exception) {
+            handleVerificationError(transactionId, e)
+        }
+    }
+
+    /**
+     * Cross-chain transaction verification support
+     */
+    suspend fun verifyCrossChainTransaction(
+        transactionId: String,
+        sourceChain: BlockchainType,
+        targetChain: BlockchainType
+    ): CrossChainVerificationResult {
+        updateState(
+            transactionId,
+            VerificationState.InProgress(transactionId, "Cross-chain verification", 0)
+        )
+
+        try {
+            val sourceVerification = verifySourceChain(transactionId, sourceChain)
+            updateState(
+                transactionId,
+                VerificationState.InProgress(transactionId, "Source chain verified", 30)
+            )
+
+            val targetVerification = verifyTargetChain(transactionId, targetChain)
+            updateState(
+                transactionId,
+                VerificationState.InProgress(transactionId, "Target chain verified", 60)
+            )
+
+            val bridgeVerification = verifyBridgeContract(transactionId, sourceChain, targetChain)
+            updateState(
+                transactionId,
+                VerificationState.InProgress(transactionId, "Bridge contract verified", 90)
+            )
+
+            return CrossChainVerificationResult(
+                isValid = sourceVerification && targetVerification && bridgeVerification,
+                sourceChainStatus = if (sourceVerification) ChainStatus.VERIFIED else ChainStatus.FAILED,
+                targetChainStatus = if (targetVerification) ChainStatus.VERIFIED else ChainStatus.FAILED,
+                bridgeStatus = if (bridgeVerification) BridgeStatus.ACTIVE else BridgeStatus.INACTIVE
+            )
+        } catch (e: Exception) {
+            handleVerificationError(transactionId, e)
+            return CrossChainVerificationResult(
+                isValid = false,
+                sourceChainStatus = ChainStatus.ERROR,
+                targetChainStatus = ChainStatus.ERROR,
+                bridgeStatus = BridgeStatus.ERROR
+            )
+        }
+    }
+
+    private suspend fun verifySourceChain(transactionId: String, chainType: BlockchainType): Boolean {
+        return when (chainType) {
+            BlockchainType.STELLAR -> verifyBasicTransaction(transactionId)
+            BlockchainType.ETHEREUM -> verifyEthereumTransaction(transactionId)
+            BlockchainType.SOLANA -> verifySolanaTransaction(transactionId)
+            else -> throw UnsupportedOperationException("Unsupported blockchain type: $chainType")
+        }
+    }
+
+    private suspend fun verifyTargetChain(transactionId: String, chainType: BlockchainType): Boolean {
+        return when (chainType) {
+            BlockchainType.STELLAR -> verifyBasicTransaction(transactionId)
+            BlockchainType.ETHEREUM -> verifyEthereumTransaction(transactionId)
+            BlockchainType.SOLANA -> verifySolanaTransaction(transactionId)
+            else -> throw UnsupportedOperationException("Unsupported blockchain type: $chainType")
+        }
+    }
+
+    private suspend fun verifyBridgeContract(
+        transactionId: String,
+        sourceChain: BlockchainType,
+        targetChain: BlockchainType
+    ): Boolean {
+        val bridgeKey = "${sourceChain.name}_${targetChain.name}"
+        return try {
+            val bridgeContract = getBridgeContract(bridgeKey)
+            bridgeContract.verifyTransaction(transactionId)
+        } catch (e: Exception) {
+            auditLogger.logEvent(
+                "BRIDGE_VERIFICATION_ERROR",
+                "Failed to verify bridge contract",
+                mapOf(
+                    "transaction_id" to transactionId,
+                    "source_chain" to sourceChain.name,
+                    "target_chain" to targetChain.name,
+                    "error" to e.message.toString()
+                )
+            )
+            false
+        }
+    }
+
+    private data class VerificationStage(
+        val name: String,
+        val progress: Int,
+        val verify: suspend () -> Boolean
+    )
 
     private suspend fun verifyBasicTransaction(transactionId: String): Boolean {
         updateState(transactionId, VerificationState.InProgress(transactionId, "Basic Transaction Validation", 20))

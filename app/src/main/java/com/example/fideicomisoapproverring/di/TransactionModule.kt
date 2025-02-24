@@ -1,12 +1,13 @@
 package com.example.fideicomisoapproverring.di
 
-import com.example.fideicomisoapproverring.recovery.logging.SecureAuditLogger
 import com.example.fideicomisoapproverring.recovery.transaction.AtomicTransactionManager
+import com.example.fideicomisoapproverring.stellar.StellarTransactionManager
+import com.example.fideicomisoapproverring.wallet.WalletManager
+import com.example.fideicomisoapproverring.util.AppLogger
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.stellar.sdk.Server
 import javax.inject.Singleton
 
 @Module
@@ -15,23 +16,18 @@ class TransactionModule {
     companion object {
         @Provides
         @Singleton
-        fun provideServer(): Server {
-            return Server("https://horizon-testnet.stellar.org")
-        }
-        
-        @Provides
-        @Singleton
-        fun provideSecureAuditLogger(): SecureAuditLogger {
-            return SecureAuditLogger()
+        fun provideAppLogger(): AppLogger {
+            return AppLogger()
         }
         
         @Provides
         @Singleton
         fun provideAtomicTransactionManager(
-            server: Server,
-            secureAuditLogger: SecureAuditLogger
+            stellarTransactionManager: StellarTransactionManager,
+            walletManager: WalletManager,
+            logger: AppLogger
         ): AtomicTransactionManager {
-            return AtomicTransactionManager(server, secureAuditLogger)
+            return AtomicTransactionManager(stellarTransactionManager, walletManager, logger)
         }
     }
 } 

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <!-- Step Number Circle -->
+    <TextView
+        android:id="@+id/stepNumberText"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="@drawable/circle_background"
+        android:gravity="center"
+        android:textAppearance="?attr/textAppearanceCaption"
+        android:textColor="?attr/colorOnPrimary"
+        tools:text="1" />
+
+    <!-- Step Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical">
+
+        <!-- Instruction -->
+        <TextView
+            android:id="@+id/instructionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody1"
+            android:textColor="?attr/colorOnSurface"
+            tools:text="Wait for network conditions to improve" />
+
+        <!-- Details -->
+        <TextView
+            android:id="@+id/detailsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            tools:text="Current congestion level: High" />
+
+        <!-- Duration (if applicable) -->
+        <TextView
+            android:id="@+id/durationText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:drawablePadding="4dp"
+            android:textAppearance="?attr/textAppearanceCaption"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:drawableStartCompat="@drawable/ic_time"
+            tools:text="Estimated: 5-10 minutes" />
+
+    </LinearLayout>
+
+</LinearLayout> 

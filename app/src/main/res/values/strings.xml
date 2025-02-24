@@ -40,39 +40,74 @@
     <string name="error_details_label">Error Details</string>
     
     <!-- Recovery Status Messages -->
-    <string name="recovery_status_analyzing">Analyzing transaction...</string>
-    <string name="recovery_status_attempting">Attempting recovery...</string>
-    <string name="recovery_status_succeeded">Recovery completed successfully</string>
-    <string name="recovery_status_failed">Recovery failed</string>
-    <string name="recovery_status_manual_intervention">Manual intervention required</string>
+    <string name="recovery_status_analyzing">Analyzing your transaction…</string>
+    <string name="recovery_status_attempting">Working on recovering your transaction…</string>
+    <string name="recovery_status_succeeded">Great news! Your transaction has been recovered successfully</string>
+    <string name="recovery_status_failed">We couldn\'t complete the recovery at this time</string>
+    <string name="recovery_status_manual_intervention">We need some help from our support team</string>
     <string name="recovery_attempt_count">Recovery attempt %1$d of %2$d</string>
     
-    <!-- Error Types -->
-    <string name="error_network_congestion">Network Congestion Error</string>
-    <string name="error_insufficient_funds">Insufficient Funds Error</string>
-    <string name="error_smart_contract">Smart Contract Error</string>
-    <string name="error_wallet_connection">Wallet Connection Error</string>
-    <string name="error_escrow_verification">Escrow Verification Error</string>
-    <string name="error_unknown">Unknown Error</string>
+    <!-- Error Types with Context -->
+    <string name="error_network_congestion">Network is busy right now</string>
+    <string name="error_network_congestion_details">The blockchain network is experiencing high traffic. This is temporary and your funds are safe.</string>
+    <string name="error_network_congestion_action">You can wait a few minutes and try again, or we can notify you when network traffic improves.</string>
+    
+    <string name="error_insufficient_funds">Insufficient balance</string>
+    <string name="error_insufficient_funds_details">Your wallet doesn\'t have enough funds to complete this transaction. Required: %1$s, Available: %2$s</string>
+    <string name="error_insufficient_funds_action">Please add more funds to your wallet or adjust the transaction amount.</string>
+    
+    <string name="error_smart_contract">Smart contract issue detected</string>
+    <string name="error_smart_contract_details">There was an issue with the smart contract execution. Error code: %1$s</string>
+    <string name="error_smart_contract_action">Our team has been notified and will help resolve this issue.</string>
+    
+    <string name="error_wallet_connection">Wallet connection lost</string>
+    <string name="error_wallet_connection_details">We\'ve lost connection to your wallet. This can happen if your wallet app is closed or needs to be unlocked.</string>
+    <string name="error_wallet_connection_action">Please check your wallet app and ensure it\'s unlocked and connected.</string>
+    
+    <string name="error_escrow_verification">Escrow verification needed</string>
+    <string name="error_escrow_verification_details">The escrow contract needs to be verified before proceeding.</string>
+    <string name="error_escrow_verification_action">Please review and verify the escrow contract details.</string>
+    
+    <string name="error_unknown">Unexpected issue</string>
+    <string name="error_unknown_details">We\'ve encountered an unexpected issue while processing your transaction.</string>
+    <string name="error_unknown_action">Our team has been automatically notified and will investigate.</string>
+    
+    <!-- Recovery Progress Messages -->
+    <string name="progress_initializing">Preparing recovery process…</string>
+    <string name="progress_analyzing">Analyzing transaction details…</string>
+    <string name="progress_verifying">Verifying blockchain state…</string>
+    <string name="progress_recovering">Applying recovery solution…</string>
+    <string name="progress_finalizing">Finalizing recovery…</string>
     
     <!-- User Actions -->
-    <string name="action_retry">Retry Transaction</string>
-    <string name="action_support">Request Support</string>
+    <string name="action_retry">Try Again</string>
+    <string name="action_retry_later">Remind Me Later</string>
+    <string name="action_support">Contact Support</string>
     <string name="action_cancel">Cancel Recovery</string>
-    <string name="action_verify_wallet">Verify Wallet</string>
-    <string name="action_verify_escrow">Verify Escrow</string>
+    <string name="action_verify_wallet">Check Wallet</string>
+    <string name="action_verify_escrow">Review Escrow</string>
+    <string name="action_add_funds">Add Funds</string>
+    <string name="action_view_details">View Details</string>
     
     <!-- Dialog Messages -->
-    <string name="dialog_cancel_title">Cancel Recovery</string>
-    <string name="dialog_cancel_message">Are you sure you want to cancel the recovery process? This action cannot be undone.</string>
-    <string name="dialog_cancel_confirm">Cancel Recovery</string>
+    <string name="dialog_cancel_title">Cancel Recovery?</string>
+    <string name="dialog_cancel_message">If you cancel now, you\'ll need to start the recovery process again. Your funds remain secure.</string>
+    <string name="dialog_cancel_confirm">Yes, Cancel Recovery</string>
     <string name="dialog_cancel_dismiss">Continue Recovery</string>
     
     <!-- Success Messages -->
-    <string name="success_recovery_completed">Transaction recovery completed successfully</string>
+    <string name="success_recovery_completed">Transaction recovered successfully!</string>
+    <string name="success_recovery_details">Your transaction has been recovered and all funds are secure.</string>
     
-    <!-- Error Messages -->
-    <string name="error_no_transaction_id">No transaction ID provided</string>
-    <string name="error_max_retries">Maximum recovery attempts reached</string>
-    <string name="error_unexpected">An unexpected error occurred</string>
+    <!-- Support Messages -->
+    <string name="support_contact_title">Need Help?</string>
+    <string name="support_contact_message">Our support team is ready to help you resolve this issue.</string>
+    <string name="support_ticket_created">Support ticket created: %1$s</string>
+    
+    <!-- Error Prevention Tips -->
+    <string name="tip_prevent_errors">Tips to prevent future issues:</string>
+    <string name="tip_wallet_connection">• Keep your wallet app open during transactions</string>
+    <string name="tip_network_congestion">• Try transactions during off-peak hours</string>
+    <string name="tip_funds">• Ensure sufficient funds before starting</string>
+    <string name="tip_contracts">• Review smart contract details carefully</string>
 </resources>

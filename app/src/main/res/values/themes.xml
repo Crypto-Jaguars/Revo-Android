@@ -4,7 +4,17 @@
     <style name="Theme.FideicomisoApproverRing" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="android:windowLightStatusBar">true</item>
         <item name="colorPrimary">#141218</item>
-        <item name="colorAccent">@color/white</item>
+        <item name="colorPrimaryVariant">#2D2535</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">#D0BCFE</item>
+        <item name="colorSecondaryVariant">#B69EE9</item>
+        <item name="colorOnSecondary">#000000</item>
+        <item name="colorSurface">#1C1B1F</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorOnSurfaceVariant">#CAC4D0</item>
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="textAppearanceHeadline5">@style/TextAppearance.MaterialComponents.Headline5</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.MaterialComponents.Body1</item>
         <item name="textInputStyle">@style/Widget.Design.TextInputLayout</item>
         <item name="fontFamily">@font/poppins</item>
     </style>
@@ -55,6 +65,12 @@
         <item name="android:textColor">#8D9099</item>
     </style>
 
-
+    <style name="Theme.App.Dialog.FullWidth" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 
 </resources>

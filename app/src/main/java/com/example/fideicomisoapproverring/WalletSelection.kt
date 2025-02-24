@@ -15,11 +15,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.identity.util.UUID
 import com.example.fideicomisoapproverring.security.SecureWalletSessionManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.security.MessageDigest
 import java.security.SecureRandom
+import java.util.UUID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 

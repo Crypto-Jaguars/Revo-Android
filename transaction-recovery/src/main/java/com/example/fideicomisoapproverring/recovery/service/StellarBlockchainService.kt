@@ -243,11 +243,85 @@ class StellarBlockchainService @Inject constructor(
         }
     }
 
-    companion object {
-        private const val DEFAULT_RETRY_INTERVAL = 30_000L // 30 seconds
-        private const val MAX_LEDGER_QUERY = 10
-        private const val CONGESTION_THRESHOLD_HIGH = 0.8f
-        private const val CONGESTION_THRESHOLD_MEDIUM = 0.6f
-        private const val CONGESTION_THRESHOLD_LOW = 0.3f
+    private companion object {
+        const val MAX_LEDGER_QUERY = 100
+        const val DEFAULT_RETRY_INTERVAL = 5000L
+        const val GAS_PRICE_SAFETY_MARGIN = 1.2
+        const val MAX_GAS_PRICE_INCREASE = 2.0
+        const val MIN_GAS_PRICE_INCREASE = 1.1
+        const val CONGESTION_THRESHOLD_HIGH = 0.8f
+        const val CONGESTION_THRESHOLD_MEDIUM = 0.6f
+        const val CONGESTION_THRESHOLD_LOW = 0.3f
+    }
+
+    /**
+     * Optimizes gas fee based on network conditions and transaction priority
+     */
+    suspend fun optimizeGasFee(transactionId: String, priority: TransactionPriority = TransactionPriority.NORMAL): Long {
+        val networkState = getNetworkState()
+        val baseFee = networkState.currentBaseFee
+        
+        val multiplier = when (priority) {
+            TransactionPriority.LOW -> 1.0
+            TransactionPriority.NORMAL -> GAS_PRICE_SAFETY_MARGIN
+            TransactionPriority.HIGH -> MAX_GAS_PRICE_INCREASE
+        }
+
+        val congestionMultiplier = (1.0 + networkState.congestion).coerceAtMost(MAX_GAS_PRICE_INCREASE)
+        val suggestedFee = (baseFee * multiplier * congestionMultiplier).toLong()
+
+        auditLogger.logEvent(
+            "GAS_FEE_OPTIMIZATION",
+            "Optimized gas fee for transaction",
+            mapOf(
+                "transaction_id" to transactionId,
+                "base_fee" to baseFee.toString(),
+                "priority" to priority.name,
+                "congestion" to networkState.congestion.toString(),
+                "suggested_fee" to suggestedFee.toString()
+            )
+        )
+
+        return suggestedFee
+    }
+
+    /**
+     * Enhanced smart contract error handling with detailed diagnostics
+     */
+    suspend fun handleSmartContractError(transactionId: String, error: SmartContractError): SmartContractDiagnostics {
+        val transaction = server.transactions().transaction(transactionId)
+        val operations = transaction.operations
+        
+        val contractOperation = operations.find { op ->
+            op.type == "invoke_host_function" || op.type == "execute_contract"
+        }
+
+        val diagnostics = SmartContractDiagnostics(
+            contractAddress = error.contractAddress,
+            errorCode = error.errorCode,
+            operationType = contractOperation?.type ?: "unknown",
+            stackTrace = parseContractStackTrace(transaction.resultXdr),
+            gasUsed = transaction.feePaid,
+            timestamp = Instant.now()
+        )
+
+        auditLogger.logEvent(
+            "SMART_CONTRACT_DIAGNOSTICS",
+            "Generated smart contract error diagnostics",
+            mapOf(
+                "transaction_id" to transactionId,
+                "contract_address" to diagnostics.contractAddress,
+                "error_code" to diagnostics.errorCode,
+                "operation_type" to diagnostics.operationType
+            )
+        )
+
+        return diagnostics
+    }
+
+    private fun parseContractStackTrace(resultXdr: String): List<String> {
+        return resultXdr.split(";")
+            .filter { it.contains("contract_error") }
+            .map { it.trim() }
     }
 } 

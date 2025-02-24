@@ -15,13 +15,22 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
 import org.stellar.sdk.*
 import org.stellar.sdk.responses.SubmitTransactionResponse
 import java.lang.Exception
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
+import com.example.fideicomisoapproverring.recovery.service.TransactionRecoveryService
+import com.example.fideicomisoapproverring.recovery.transaction.AtomicTransactionManager
+import com.example.fideicomisoapproverring.recovery.ui.TransactionRecoveryDialog
+import com.example.fideicomisoapproverring.recovery.model.TransactionError
 
+@AndroidEntryPoint
 class FindEscrowActivity : AppCompatActivity() {
 
     private lateinit var loadingPanel: LinearLayout
@@ -36,6 +45,12 @@ class FindEscrowActivity : AppCompatActivity() {
     private lateinit var statusBanner: View
     private lateinit var statusIcon: ImageView
     private lateinit var statusText: TextView
+
+    @Inject
+    lateinit var transactionManager: AtomicTransactionManager
+
+    @Inject
+    lateinit var recoveryService: TransactionRecoveryService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +80,7 @@ class FindEscrowActivity : AppCompatActivity() {
             showStatusBanner(ConnectionStatus.SUCCESS, statusBanner, statusIcon, statusText)
         }
 
-        // Manages the logic of the “Enter” button.
+        // Manages the logic of the "Enter" button.
         enterButton.setOnClickListener {
             val engagementId = engagementIdInput.text.toString()
             val contractId = contractIdInput.text.toString()
@@ -81,7 +96,7 @@ class FindEscrowActivity : AppCompatActivity() {
 
         setupSignTransactionButton()
 
-        // Manages the “Check Balance” button
+        // Manages the "Check Balance" button
         val checkBalanceButton: Button = findViewById(R.id.checkBalanceButton)
         checkBalanceButton.setOnClickListener {
             val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
@@ -94,7 +109,7 @@ class FindEscrowActivity : AppCompatActivity() {
             }
         }
 
-        // Manages the “Logout” button
+        // Manages the "Logout" button
         logoutButton.setOnClickListener {
             logout()
         }
@@ -244,47 +259,55 @@ class FindEscrowActivity : AppCompatActivity() {
     }
 
     private fun signAndSendTransaction(privateKey: String, publicKey: String) {
-        try {
-
-            val server = Server("https://horizon-testnet.stellar.org")
-
-
-            val sourceAccount = server.accounts().account(publicKey)
-
-
-            val transaction = Transaction.Builder(sourceAccount, Network.TESTNET)
-                .addOperation(
-                    PaymentOperation.Builder(
-                        "GCDXSOPD5T5MCGCPPRV3CWMYLTTWASVZBF4HZBNES6PGK7YRATM27NB4",
-                        AssetTypeNative(),
-                        "1000"
-                    ).build()
+        lifecycleScope.launch {
+            try {
+                val result = transactionManager.executeTransaction(
+                    sourceAccount = publicKey,
+                    destinationAccount = "GCDXSOPD5T5MCGCPPRV3CWMYLTTWASVZBF4HZBNES6PGK7YRATM27NB4",
+                    amount = "1000",
+                    memo = "Escrow Payment"
                 )
-                .setTimeout((System.currentTimeMillis() / 1000) + 300)
-                .setBaseFee(Transaction.MIN_BASE_FEE.toLong())
-                .build()
-
-
-            val keyPair = KeyPair.fromSecretSeed(privateKey)
-            transaction.sign(keyPair)
-
-
-            val response: SubmitTransactionResponse = server.submitTransaction(transaction)
-
-            if (response.isSuccess) {
-                runOnUiThread {
-                    Toast.makeText(this, "Transaction successful!", Toast.LENGTH_LONG).show()
+                
+                when (result) {
+                    is AtomicTransactionManager.TransactionState.Success -> {
+                        runOnUiThread {
+                            Toast.makeText(this@FindEscrowActivity, 
+                                "Transaction successful!", 
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                    is AtomicTransactionManager.TransactionState.Error -> {
+                        handleTransactionError(result.error)
+                    }
+                    is AtomicTransactionManager.TransactionState.Pending -> {
+                        runOnUiThread {
+                            Toast.makeText(this@FindEscrowActivity,
+                                "Transaction is pending...",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
                 }
-            } else {
+            } catch (e: Exception) {
+                e.printStackTrace()
                 runOnUiThread {
-                    Toast.makeText(this, "Transaction failed: ${response.resultXdr}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@FindEscrowActivity,
+                        "Error signing transaction: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            runOnUiThread {
-                Toast.makeText(this, "Error signing transaction: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+        }
+    }
+
+    private fun handleTransactionError(error: TransactionError) {
+        runOnUiThread {
+            TransactionRecoveryDialog(
+                context = this,
+                transactionError = error,
+                recoveryService = recoveryService
+            ).show()
         }
     }
 

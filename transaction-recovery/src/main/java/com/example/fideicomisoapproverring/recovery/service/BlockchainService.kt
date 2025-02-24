@@ -5,6 +5,7 @@ import com.example.fideicomisoapproverring.recovery.model.TransactionError
 import com.example.fideicomisoapproverring.recovery.forensics.BlockchainState
 import com.example.fideicomisoapproverring.stellar.model.NetworkState
 import kotlinx.coroutines.flow.Flow
+import com.example.fideicomisoapproverring.recovery.model.NetworkStatus
 
 /**
  * Service interface for blockchain interactions in the Revolutionary Farmers marketplace.
@@ -64,4 +65,6 @@ interface BlockchainService {
      * @return Flow of blockchain events related to the transaction
      */
     fun monitorTransactionEvents(transactionId: String): Flow<BlockchainEvent>
+
+    suspend fun getNetworkStatus(): NetworkStatus
 } 
