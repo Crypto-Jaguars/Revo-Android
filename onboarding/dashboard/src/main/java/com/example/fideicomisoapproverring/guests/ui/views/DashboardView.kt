@@ -92,6 +92,7 @@ fun DashboardView(
     onViewAllProducts: () -> Unit = {},
     onAuthenticate: () -> Unit = {},
     onMenuClick: (String) -> Unit = {},
+    onThemeSettingsClick: () -> Unit = {},
 ) {
     var openAlertDialog = remember { mutableStateOf(false) }
 
@@ -105,7 +106,12 @@ fun DashboardView(
             ) {
                 ModalDrawerContentView(
                     menus = NavigationDrawerMenuItem.defaultMenus,
-                    onMenuClick = onMenuClick,
+                    onMenuClick = { route ->
+                        when (route) {
+                            Routes.ThemeSettings.value -> onThemeSettingsClick()
+                            else -> onMenuClick(route)
+                        }
+                    },
                 )
             }
         },

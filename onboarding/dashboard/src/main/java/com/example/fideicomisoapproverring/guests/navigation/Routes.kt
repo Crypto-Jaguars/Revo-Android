@@ -10,4 +10,5 @@ enum class Routes(val value: String) {
     FAQ("faq"),
     About("about_us"),
     Activity("activity"),
+    ThemeSettings("theme_settings"),
 }
