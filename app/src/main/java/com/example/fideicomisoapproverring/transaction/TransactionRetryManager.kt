@@ -68,7 +68,7 @@ class TransactionRetryManager {
         transactionId: String,
         error: TransactionErrorHandler.TransactionError,
         retryAction: suspend () -> Unit
-    ) {
+    ): Unit {
         val state = transactionStates.getOrPut(transactionId) { 
             TransactionState(transactionId) 
         }

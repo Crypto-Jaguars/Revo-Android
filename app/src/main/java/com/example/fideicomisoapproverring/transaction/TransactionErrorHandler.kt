@@ -28,6 +28,7 @@ class TransactionErrorHandler {
         val type: ErrorType,
         val code: String,
         val message: String,
+        val userMessage: String,
         val timestamp: Long = System.currentTimeMillis(),
         val transactionId: String? = null,
         val recoverable: Boolean = false
@@ -42,6 +43,7 @@ class TransactionErrorHandler {
                 type = ErrorType.NETWORK,
                 code = "NETWORK_ERROR",
                 message = "Network connection error: ${throwable.message}",
+                userMessage = "We're having trouble connecting to the network. Please check your internet connection and try again.",
                 transactionId = transactionId,
                 recoverable = true
             )
@@ -63,6 +65,7 @@ class TransactionErrorHandler {
                 type = ErrorType.BLOCKCHAIN,
                 code = "INSUFFICIENT_FEE",
                 message = "Transaction fee is too low",
+                userMessage = "The network is busy right now. We'll try again with a slightly higher fee.",
                 transactionId = transactionId,
                 recoverable = true
             )
@@ -70,6 +73,7 @@ class TransactionErrorHandler {
                 type = ErrorType.BLOCKCHAIN,
                 code = "INSUFFICIENT_BALANCE",
                 message = "Insufficient funds for transaction",
+                userMessage = "There aren't enough funds in your account to complete this transaction. Please check your balance.",
                 transactionId = transactionId,
                 recoverable = false
             )
@@ -77,6 +81,7 @@ class TransactionErrorHandler {
                 type = ErrorType.BLOCKCHAIN,
                 code = extras?.resultCodes?.transactionResultCode ?: "UNKNOWN_BLOCKCHAIN_ERROR",
                 message = "Blockchain error: ${extras?.resultCodes?.transactionResultCode}",
+                userMessage = "There was an issue processing your transaction. Our team has been notified and will help resolve this.",
                 transactionId = transactionId,
                 recoverable = false
             )
@@ -87,13 +92,32 @@ class TransactionErrorHandler {
      * Handles wallet-related errors
      */
     fun handleWalletError(error: Exception, transactionId: String? = null): TransactionError {
-        return TransactionError(
-            type = ErrorType.WALLET,
-            code = "WALLET_ERROR",
-            message = "Wallet error: ${error.message}",
-            transactionId = transactionId,
-            recoverable = true
-        )
+        return when {
+            error.message?.contains("base32") == true -> TransactionError(
+                type = ErrorType.WALLET,
+                code = "WALLET_FORMAT_ERROR",
+                message = "Invalid wallet address format",
+                userMessage = "There seems to be an issue with your wallet address. Please try reconnecting your wallet.",
+                transactionId = transactionId,
+                recoverable = true
+            )
+            error.message?.contains("connection") == true -> TransactionError(
+                type = ErrorType.WALLET,
+                code = "WALLET_CONNECTION_ERROR",
+                message = "Wallet connection error: ${error.message}",
+                userMessage = "We lost connection to your wallet. Please check that it's still connected and try again.",
+                transactionId = transactionId,
+                recoverable = true
+            )
+            else -> TransactionError(
+                type = ErrorType.WALLET,
+                code = "WALLET_ERROR",
+                message = "Wallet error: ${error.message}",
+                userMessage = "There was an issue with your wallet. Please try disconnecting and connecting again.",
+                transactionId = transactionId,
+                recoverable = true
+            )
+        }
     }
 
     /**
@@ -104,6 +128,7 @@ class TransactionErrorHandler {
             type = ErrorType.CONTRACT,
             code = "CONTRACT_ERROR",
             message = "Smart contract error: ${error.message}",
+            userMessage = "There was an issue with the escrow contract. Our support team will help you resolve this.",
             transactionId = transactionId,
             recoverable = false
         )
@@ -114,6 +139,7 @@ class TransactionErrorHandler {
             type = ErrorType.UNKNOWN,
             code = "UNKNOWN_ERROR",
             message = "Unknown error: ${throwable.message}",
+            userMessage = "Something unexpected happened. We're looking into it and will help you resolve this issue.",
             transactionId = transactionId,
             recoverable = false
         )
@@ -127,7 +153,8 @@ class TransactionErrorHandler {
             Transaction Error:
             Type: ${error.type}
             Code: ${error.code}
-            Message: ${error.message}
+            Technical Message: ${error.message}
+            User Message: ${error.userMessage}
             Transaction ID: ${error.transactionId ?: "N/A"}
             Timestamp: ${error.timestamp}
             Recoverable: ${error.recoverable}

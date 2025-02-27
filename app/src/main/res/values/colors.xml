@@ -17,6 +17,7 @@
     <color name="refresh_progress_1">#6200EE</color>
     <color name="refresh_progress_2">#3700B3</color>
     <color name="refresh_progress_3">#03DAC5</color>
+    <color name="progress_track">#4D6200EE</color>
 
     <!-- Shimmer effect colors -->
     <color name="shimmer_color">#1FFFFFFF</color>
