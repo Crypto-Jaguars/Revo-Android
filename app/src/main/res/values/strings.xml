@@ -35,4 +35,6 @@
     <string name="label_in_stock">In Stock</string>
     <string name="label_out_of_stock">Out of Stock</string>
     <string name="label_view_details">View Details</string>
+    <string name="upload_product">Upload Product</string>
+    <string name="select_images">Select Images</string>
 </resources>
