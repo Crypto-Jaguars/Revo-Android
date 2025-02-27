@@ -19,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.fideicomisoapproverring.transaction.TransactionMonitor
 import com.example.fideicomisoapproverring.transaction.TransactionErrorHandler
+import com.example.fideicomisoapproverring.transaction.TransactionRetryManager
+import com.example.fideicomisoapproverring.transaction.TransactionStateManager
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
@@ -50,12 +52,23 @@ class FindEscrowActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
 
     private lateinit var transactionMonitor: TransactionMonitor
+    private lateinit var transactionRetryManager: TransactionRetryManager
+    private lateinit var transactionStateManager: TransactionStateManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFindEscrowBinding.inflate(layoutInflater)
         setContentView(binding.root)
         transactionMonitor = TransactionMonitor()
+        transactionRetryManager = TransactionRetryManager()
+        transactionStateManager = TransactionStateManager(this)
+
+        // Load any persisted transaction states
+        lifecycleScope.launch {
+            transactionStateManager.loadPersistedStates()
+            // Clean up old transactions
+            transactionStateManager.cleanupOldTransactions()
+        }
 
         // Initialize components
         loadingPanel = binding.loadingPanel
@@ -239,8 +252,8 @@ class FindEscrowActivity : AppCompatActivity() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-            val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
-            val publicKey = sharedPreferences.getString("publicKey", null)
+                val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
+                val publicKey = sharedPreferences.getString("publicKey", null)
                 val rawPrivateKey = BuildConfig.STELLAR_PRIVATE_KEY
 
                 Log.d("TransactionFlow", "Private key validation:")
@@ -290,80 +303,117 @@ class FindEscrowActivity : AppCompatActivity() {
                 Log.d("TransactionFlow", "Connecting wallet with public key: $publicKey")
                 transactionMonitor.onWalletConnection(transactionId, true)
                 
-                // Set up network and server
-            val server = Server("https://horizon-testnet.stellar.org")
+                val server = Server("https://horizon-testnet.stellar.org")
+                val destinationAccount = "GACLZTQDEX4UQVCXVWJDE3VN353OWQEBABW4R5RJDPGKESGEHE5Z7CNV"
+                val amount = "10"
+
+                // Save initial transaction state
+                transactionStateManager.saveTransactionState(
+                    transactionId = transactionId,
+                    sourceAccount = publicKey!!,
+                    destinationAccount = destinationAccount,
+                    amount = amount
+                )
 
                 withContext(Dispatchers.Main) {
                     showLoading(true)
                 }
 
-                Log.d("TransactionFlow", "Fetching source account from Stellar network")
-                val sourceAccount = try {
-                    server.accounts().account(publicKey)
-                } catch (e: Exception) {
-                    Log.e("TransactionFlow", "Exception during account fetch: ${e.message}")
-                    Log.e("TransactionFlow", e.stackTraceToString())
-                    
-                    // Check if the account doesn't exist
-                    if (e is org.stellar.sdk.requests.ErrorResponse && e.message?.contains("not found") == true) {
+                val retryAction = suspend {
+                    try {
+                        Log.d("TransactionFlow", "Fetching source account from Stellar network")
+                        val sourceAccount = server.accounts().account(publicKey)
+
+                        Log.d("TransactionFlow", "Building transaction")
+                        transactionMonitor.onTransactionSigning(transactionId)
+
+                        val transaction = Transaction.Builder(sourceAccount, Network.TESTNET)
+                            .addOperation(
+                                PaymentOperation.Builder(
+                                    destinationAccount,
+                                    AssetTypeNative(),
+                                    amount
+                                ).build()
+                            )
+                            .setTimeout(180)
+                            .setBaseFee(100)
+                            .build()
+
+                        Log.d("TransactionFlow", "Signing transaction")
+                        val keyPair = KeyPair.fromSecretSeed(privateKey)
+                        transaction.sign(keyPair)
+                        transactionMonitor.onTransactionSigned(transactionId, true)
+
+                        Log.d("TransactionFlow", "Submitting transaction")
+                        val response = server.submitTransaction(transaction)
+                        Log.d("TransactionFlow", "Transaction response: ${response.hash}")
+                        transactionMonitor.onTransactionSubmission(transactionId, response)
+
                         withContext(Dispatchers.Main) {
                             showLoading(false)
-                            Toast.makeText(this@FindEscrowActivity, "Account not found on Stellar testnet. Please fund your account first.", Toast.LENGTH_LONG).show()
+                            if (response.isSuccess) {
+                                transactionRetryManager.resetRetryState(transactionId)
+                                // Update transaction state to completed
+                                transactionStateManager.updateTransactionState(
+                                    transactionId = transactionId,
+                                    status = TransactionStateManager.TransactionStatus.COMPLETED,
+                                    response = response
+                                )
+                                Toast.makeText(this@FindEscrowActivity, "Transaction successful!", Toast.LENGTH_SHORT).show()
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    fetchBalance(publicKey)
+                                }, 2000)
+                            } else {
+                                // Update transaction state to failed
+                                transactionStateManager.updateTransactionState(
+                                    transactionId = transactionId,
+                                    status = TransactionStateManager.TransactionStatus.FAILED
+                                )
+                                val error = TransactionErrorHandler().handleStellarError(response, transactionId)
+                                throw Exception(error.message)
+                            }
                         }
-                        return@launch
+                    } catch (e: Exception) {
+                        throw e
                     }
-                    throw e
                 }
 
-                Log.d("TransactionFlow", "Building transaction")
-                transactionMonitor.onTransactionSigning(transactionId)
-
-            val transaction = Transaction.Builder(sourceAccount, Network.TESTNET)
-                .addOperation(
-                    PaymentOperation.Builder(
-                        "GACLZTQDEX4UQVCXVWJDE3VN353OWQEBABW4R5RJDPGKESGEHE5Z7CNV", // Using a known valid public key for testing
-                        AssetTypeNative(),
-                        "10"
-                    ).build()
-                )
-                    .setTimeout(180)
-                    .setBaseFee(100)
-                .build()
-
-                Log.d("TransactionFlow", "Signing transaction")
-            val keyPair = KeyPair.fromSecretSeed(privateKey)
-            transaction.sign(keyPair)
-                transactionMonitor.onTransactionSigned(transactionId, true)
-
-                Log.d("TransactionFlow", "Submitting transaction")
                 try {
-                    val response = server.submitTransaction(transaction)
-                    Log.d("TransactionFlow", "Transaction response: ${response.hash}")
-                    transactionMonitor.onTransactionSubmission(transactionId, response)
-                    
-                    withContext(Dispatchers.Main) {
-                        showLoading(false)
-                        if (response.isSuccess) {
-                            Toast.makeText(this@FindEscrowActivity, "Transaction successful!", Toast.LENGTH_SHORT).show()
-                            // Refresh balance after successful transaction
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                fetchBalance(publicKey)
-                            }, 2000)
-                        } else {
-                            handleTransactionError(transactionId, "TRANSACTION_ERROR", "Transaction failed: ${response.extras?.resultCodes?.transactionResultCode}")
+                    retryAction()
+                } catch (e: Exception) {
+                    val error = when (e) {
+                        is org.stellar.sdk.requests.ErrorResponse -> {
+                            TransactionErrorHandler().handleStellarError(e as SubmitTransactionResponse, transactionId)
+                        }
+                        else -> {
+                            TransactionErrorHandler().handleWalletError(e, transactionId)
                         }
                     }
-                } catch (e: Exception) {
-                    Log.e("TransactionFlow", "Exception during transaction: ${e.message}")
-                    Log.e("TransactionFlow", e.stackTraceToString())
-                    
-                    withContext(Dispatchers.Main) {
-                        showLoading(false)
-                        handleTransactionError(transactionId, "TRANSACTION_ERROR", e.message ?: "Unknown error")
+
+                    // Update transaction state to failed
+                    transactionStateManager.updateTransactionState(
+                        transactionId = transactionId,
+                        status = TransactionStateManager.TransactionStatus.FAILED
+                    )
+
+                    // Attempt retry for recoverable errors
+                    if (transactionRetryManager.isRetryable(error)) {
+                        transactionRetryManager.handleTransactionError(transactionId, error, retryAction)
+                    } else {
+                        // If error is not retryable, check if we can rollback
+                        val canRollback = transactionStateManager.initiateRollback(transactionId)
+                        if (canRollback) {
+                            performRollback(transactionId)
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            showLoading(false)
+                            handleTransactionError(transactionId, error.code, error.message)
+                        }
                     }
                 }
             } catch (e: Exception) {
-                Log.e("TransactionFlow", "Exception during transaction: ${e.message}")
+                Log.e("TransactionFlow", "Final exception during transaction: ${e.message}")
                 Log.e("TransactionFlow", e.stackTraceToString())
                 
                 withContext(Dispatchers.Main) {
@@ -371,6 +421,41 @@ class FindEscrowActivity : AppCompatActivity() {
                     handleTransactionError(transactionId, "WALLET_ERROR", e.message ?: "Unknown error")
                 }
             }
+        }
+    }
+
+    /**
+     * Performs a rollback operation for a failed transaction
+     */
+    private suspend fun performRollback(transactionId: String) {
+        try {
+            val state = transactionStateManager.getTransactionState(transactionId) ?: return
+            val server = Server("https://horizon-testnet.stellar.org")
+            
+            // Create a reverse transaction
+            val sourceAccount = server.accounts().account(state.destinationAccount)
+            val transaction = Transaction.Builder(sourceAccount, Network.TESTNET)
+                .addOperation(
+                    PaymentOperation.Builder(
+                        state.sourceAccount,
+                        AssetTypeNative(),
+                        state.amount
+                    ).build()
+                )
+                .setTimeout(180)
+                .setBaseFee(100)
+                .build()
+
+            // Submit rollback transaction
+            val response = server.submitTransaction(transaction)
+            if (response.isSuccess) {
+                transactionStateManager.completeRollback(transactionId, response)
+                Log.d("TransactionFlow", "Rollback successful for transaction $transactionId")
+            } else {
+                Log.e("TransactionFlow", "Rollback failed for transaction $transactionId")
+            }
+        } catch (e: Exception) {
+            Log.e("TransactionFlow", "Error during rollback: ${e.message}")
         }
     }
 
