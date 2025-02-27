@@ -55,6 +55,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +71,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -87,8 +90,10 @@ import com.example.fideicomisoapproverring.theme.icons.ringcore.IcArrowTopRight
 import com.example.fideicomisoapproverring.theme.icons.ringcore.IcUpwardTrend
 import com.example.fideicomisoapproverring.theme.icons.ringcore.IcWallet
 import com.example.fideicomisoapproverring.theme.ui.theme.RingCoreTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
+import androidx.compose.material3.TextField
 
 
 @SuppressLint("RestrictedApi")
@@ -104,6 +109,18 @@ fun DashboardView(
     var openAlertDialog = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val selectedImages = remember { mutableStateListOf<Uri>() }
+    val trie = remember { Trie() }
+    val suggestions = listOf("Apple", "Banana", "Cherry", "Date", "Elderberry") // Example suggestions
+    suggestions.forEach { trie.insert(it) } // Populate the Trie
+
+    val searchQueryState = remember { mutableStateOf(TextFieldValue("")) }
+    val filteredSuggestionsState = remember { mutableStateOf(emptyList<String>()) }
+
+    // Debounce logic
+    LaunchedEffect(searchQueryState.value.text) {
+        delay(300) // Wait for 300ms before processing
+        filteredSuggestionsState.value = trie.search(searchQueryState.value.text) // Update suggestions
+    }
 
     // Create an ActivityResultLauncher for the image picker
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -286,6 +303,31 @@ fun DashboardView(
                             .fillMaxWidth()
                     ) {
                         Text(text = stringResource(R.string.upload_product))
+                    }
+
+                    // Add Search TextField
+                    TextField(
+                        value = searchQueryState.value,
+                        onValueChange = { searchQueryState.value = it },
+                        placeholder = { Text("Search...") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Display Suggestions
+                    if (filteredSuggestionsState.value.isNotEmpty()) {
+                        Column {
+                            filteredSuggestionsState.value.forEach { suggestion ->
+                                Text(
+                                    text = suggestion,
+                                    modifier = Modifier
+                                        .clickable {
+                                            // Handle suggestion click
+                                            searchQueryState.value = TextFieldValue(suggestion)
+                                        }
+                                        .padding(8.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
