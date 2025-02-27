@@ -26,5 +26,7 @@
     <string name="dialog_msg_secure_transaction">1. Secure and seamless transactions</string>
     <string name="dialog_msg_track_purchase">2. Save favourites and track purchase</string>
     <string name="dialog_msg_unlock_features">3. Unlock full marketplace features</string>
+     <string name="upload_product">Upload Product</string>
+    <string name="select_images">Select Images</string>
 
 </resources>
