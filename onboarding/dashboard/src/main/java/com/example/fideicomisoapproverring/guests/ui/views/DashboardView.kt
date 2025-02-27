@@ -110,16 +110,16 @@ fun DashboardView(
     val coroutineScope = rememberCoroutineScope()
     val selectedImages = remember { mutableStateListOf<Uri>() }
     val trie = remember { Trie() }
-    val suggestions = listOf("Apple", "Banana", "Cherry", "Date", "Elderberry") // Example suggestions
-    suggestions.forEach { trie.insert(it) } // Populate the Trie
+    val suggestions = listOf("Apple", "Banana", "Cherry", "Date", "Elderberry")
+    suggestions.forEach { trie.insert(it) }
 
     val searchQueryState = remember { mutableStateOf(TextFieldValue("")) }
     val filteredSuggestionsState = remember { mutableStateOf(emptyList<String>()) }
 
-    // Debounce logic
+
     LaunchedEffect(searchQueryState.value.text) {
-        delay(300) // Wait for 300ms before processing
-        filteredSuggestionsState.value = trie.search(searchQueryState.value.text) // Update suggestions
+        delay(300)
+        filteredSuggestionsState.value = trie.search(searchQueryState.value.text)
     }
 
     // Create an ActivityResultLauncher for the image picker

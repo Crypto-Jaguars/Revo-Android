@@ -3,7 +3,7 @@ package com.example.fideicomisoapproverring.guests.ui.views
 class TrieNode {
     val children = mutableMapOf<Char, TrieNode>()
     var isEndOfWord = false
-    var suggestions = mutableListOf<String>() // Store suggestions for this node
+    var suggestions = mutableListOf<String>() 
 }
 
 class Trie {
