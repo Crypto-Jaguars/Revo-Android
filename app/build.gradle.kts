@@ -36,8 +36,6 @@ android {
         }
         buildConfigField("String", "LOBSTR_SIGNATURE_HASH", properties["LOBSTR_SIGNATURE_HASH"].toString())
         buildConfigField("String", "APP_SECRET_KEY", properties["APP_SECRET_KEY"].toString())
-        buildConfigField("String", "STELLAR_PUBLIC_KEY", "\"${getProperty("stellar.public.key")}\"")
-        buildConfigField("String", "STELLAR_PRIVATE_KEY", "\"${getProperty("stellar.private.key")}\"")
     }
 
     buildTypes {
