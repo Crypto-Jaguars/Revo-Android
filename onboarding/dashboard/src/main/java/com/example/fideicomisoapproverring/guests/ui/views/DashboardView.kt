@@ -25,10 +25,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -94,7 +97,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
 import androidx.compose.material3.TextField
-
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.foundation.layout.heightIn
+import com.example.fideicomisoapproverring.guests.ui.views.Trie
+import com.example.fideicomisoapproverring.guests.ui.views.TrieNode
 
 @SuppressLint("RestrictedApi")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,17 +116,35 @@ fun DashboardView(
     var openAlertDialog = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val selectedImages = remember { mutableStateListOf<Uri>() }
-    val trie = remember { Trie() }
-    val suggestions = listOf("Apple", "Banana", "Cherry", "Date", "Elderberry")
-    suggestions.forEach { trie.insert(it) }
 
+    // Initialize search-related states
     val searchQueryState = remember { mutableStateOf(TextFieldValue("")) }
+    val isSearchVisible = remember { mutableStateOf(false) }
     val filteredSuggestionsState = remember { mutableStateOf(emptyList<String>()) }
 
+    // Initialize Trie with suggestions
+    val trie = remember { Trie() }
+    val suggestions = listOf(
+        "Apple", "Apricot", "Avocado", "Banana", "Blackberry", "Blueberry",
+        "Cherry", "Coconut", "Cranberry", "Date", "Dragonfruit", "Grape",
+        "Grapefruit", "Kiwi", "Lemon", "Lime", "Mango", "Melon", "Orange",
+        "Papaya", "Peach", "Pear", "Pineapple", "Plum", "Pomegranate",
+        "Raspberry", "Strawberry", "Watermelon"
+    )
 
+    // Populate Trie with suggestions
+    LaunchedEffect(Unit) {
+        suggestions.forEach { trie.insert(it) }
+    }
+
+    // Update suggestions when search query changes
     LaunchedEffect(searchQueryState.value.text) {
-        delay(300)
-        filteredSuggestionsState.value = trie.search(searchQueryState.value.text)
+        if (searchQueryState.value.text.isNotEmpty()) {
+            delay(300) // Debounce delay
+            filteredSuggestionsState.value = trie.search(searchQueryState.value.text)
+        } else {
+            filteredSuggestionsState.value = emptyList()
+        }
     }
 
     // Create an ActivityResultLauncher for the image picker
@@ -204,29 +229,20 @@ fun DashboardView(
                                     )
                                 },
                                 label = { Text(text = stringResource(item.label)) },
-                                selected =
-                                    currentDestination?.hierarchy?.any {
-                                        it.hasRoute(
-                                            item.route,
-                                            null,
-                                        )
-                                    } == true,
+                                selected = currentDestination?.hierarchy?.any {
+                                    it.hasRoute(item.route, null)
+                                } == true,
                                 onClick = {
-                                    // TODO: Remove conditional clause when stubbed screens have been built
-                                    if (item.route != Routes.Home.value) {
+                                    if (item.route == Routes.Search.value) {
+                                        isSearchVisible.value = true
+                                    } else if (item.route != Routes.Home.value) {
                                         openAlertDialog.value = true
                                     } else {
                                         navController.navigate(item.route) {
-                                            // Pop up to the start destination of the graph to
-                                            // avoid building up a large stack of destinations
-                                            // on the back stack as users select items
                                             popUpTo(navController.graph.findStartDestination().id) {
                                                 saveState = true
                                             }
-                                            // Avoid multiple copies of the same destination when
-                                            // re-selecting the same item
                                             launchSingleTop = true
-                                            // Restore state when re-selecting a previously selected item
                                             restoreState = true
                                         }
                                     }
@@ -305,29 +321,23 @@ fun DashboardView(
                         Text(text = stringResource(R.string.upload_product))
                     }
 
-                    // Add Search TextField
-                    TextField(
-                        value = searchQueryState.value,
-                        onValueChange = { searchQueryState.value = it },
-                        placeholder = { Text("Search...") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    // Display Suggestions
-                    if (filteredSuggestionsState.value.isNotEmpty()) {
-                        Column {
-                            filteredSuggestionsState.value.forEach { suggestion ->
-                                Text(
-                                    text = suggestion,
-                                    modifier = Modifier
-                                        .clickable {
-                                            // Handle suggestion click
-                                            searchQueryState.value = TextFieldValue(suggestion)
-                                        }
-                                        .padding(8.dp)
-                                )
+                    if (isSearchVisible.value) {
+                        SearchModal(
+                            searchQuery = searchQueryState.value,
+                            onSearchQueryChange = { newValue ->
+                                searchQueryState.value = newValue
+                                // Suggestions will be updated by the LaunchedEffect above
+                            },
+                            suggestions = filteredSuggestionsState.value,
+                            onSuggestionClick = { suggestion ->
+                                searchQueryState.value = TextFieldValue(suggestion)
+                                isSearchVisible.value = false
+                            },
+                            onDismiss = {
+                                isSearchVisible.value = false
+                                searchQueryState.value = TextFieldValue("") // Clear search when dismissed
                             }
-                        }
+                        )
                     }
                 }
             }
@@ -756,6 +766,66 @@ fun ConnectWalletDialog(
                 Text("Dismiss")
             }
         },
+    )
+}
+
+@Composable
+fun SearchModal(
+    searchQuery: TextFieldValue,
+    onSearchQueryChange: (TextFieldValue) -> Unit,
+    suggestions: List<String>,
+    onSuggestionClick: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
+            usePlatformDefaultWidth = false
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        title = null,
+        text = {
+            Column {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    placeholder = { Text("Search...") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    )
+                )
+
+                if (suggestions.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier.heightIn(max = 200.dp)
+                    ) {
+                        items(suggestions) { suggestion ->
+                            Text(
+                                text = suggestion,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onSuggestionClick(suggestion)
+                                    }
+                                    .padding(vertical = 12.dp, horizontal = 8.dp),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {}
     )
 }
 
