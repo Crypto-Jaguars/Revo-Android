@@ -3,6 +3,7 @@ package com.example.fideicomisoapproverring
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +23,9 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import android.widget.Toast
+
+class MainActivity : AppCompatActivity() {
+    
 
 class MainActivity : AppCompatActivity() {
     private lateinit var sessionManager: SecureWalletSessionManager

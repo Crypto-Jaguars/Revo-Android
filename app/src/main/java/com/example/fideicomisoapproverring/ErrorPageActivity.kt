@@ -17,7 +17,7 @@ class ErrorPageActivity : AppCompatActivity() {
         const val ERROR_TYPE = "error_type"
         const val ERROR_404 = "404"
         const val ERROR_NETWORK = "network"
-        const val ERROR_TRANSACTION = "transaction"
+        const val ERROR_TRANSACTION = "transaction_error"
         const val ERROR_SYSTEM = "system"
     }
 
@@ -40,21 +40,22 @@ class ErrorPageActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
     }
 
     private fun setupErrorPage(errorType: String) {
         val illustration = findViewById<ImageView>(R.id.errorIllustration)
-        val title = findViewById<TextView>(R.id.errorTitle)
-        val message = findViewById<TextView>(R.id.errorMessage)
+        val errorTitle = findViewById<TextView>(R.id.errorTitle)
+        val errorMessage = findViewById<TextView>(R.id.errorMessage)
+        val errorRecovery = findViewById<TextView>(R.id.errorRecovery)
         val primaryButton = findViewById<Button>(R.id.primaryActionButton)
         val secondaryButton = findViewById<Button>(R.id.secondaryActionButton)
 
         when (errorType) {
-            ERROR_404 -> setup404Error(illustration, title, message, primaryButton, secondaryButton)
-            ERROR_NETWORK -> setupNetworkError(illustration, title, message, primaryButton, secondaryButton)
-            ERROR_TRANSACTION -> setupTransactionError(illustration, title, message, primaryButton, secondaryButton)
-            else -> setupSystemError(illustration, title, message, primaryButton, secondaryButton)
+            ERROR_404 -> setup404Error(illustration, errorTitle, errorMessage, errorRecovery, primaryButton, secondaryButton)
+            ERROR_NETWORK -> setupNetworkError(illustration, errorTitle, errorMessage, errorRecovery, primaryButton, secondaryButton)
+            ERROR_TRANSACTION -> setupTransactionError(illustration, errorTitle, errorMessage, errorRecovery, primaryButton, secondaryButton)
+            else -> setupSystemError(illustration, errorTitle, errorMessage, errorRecovery, primaryButton, secondaryButton)
         }
 
         val bounceAnimation = AnimationUtils.loadAnimation(this, R.anim.gentle_bounce)
@@ -63,14 +64,16 @@ class ErrorPageActivity : AppCompatActivity() {
 
     private fun setup404Error(
         illustration: ImageView,
-        title: TextView,
-        message: TextView,
+        errorTitle: TextView,
+        errorMessage: TextView,
+        errorRecovery: TextView,
         primaryButton: Button,
         secondaryButton: Button
     ) {
         illustration.setImageResource(R.drawable.lost_in_fields)
-        title.text = "Lost in the Fields"
-        message.text = "Looks like we've wandered into an empty field. The crop you're looking for isn't growing here."
+        errorTitle.text = "Lost in the Fields"
+        errorMessage.text = "Looks like we've wandered into an empty field. The crop you're looking for isn't growing here."
+        errorRecovery.text = "Please try again"
         primaryButton.text = "Return to Home"
         secondaryButton.text = "Contact Support"
 
@@ -84,14 +87,16 @@ class ErrorPageActivity : AppCompatActivity() {
 
     private fun setupNetworkError(
         illustration: ImageView,
-        title: TextView,
-        message: TextView,
+        errorTitle: TextView,
+        errorMessage: TextView,
+        errorRecovery: TextView,
         primaryButton: Button,
         secondaryButton: Button
     ) {
         illustration.setImageResource(R.drawable.no_signal)
-        title.text = "Connection Lost"
-        message.text = "Seems like we're having trouble connecting to the farm. Check your internet connection and try again."
+        errorTitle.text = "Connection Lost"
+        errorMessage.text = "Seems like we're having trouble connecting to the farm. Check your internet connection and try again."
+        errorRecovery.text = "Work Offline"
         primaryButton.text = "Try Again"
         secondaryButton.text = "Work Offline"
 
@@ -104,14 +109,16 @@ class ErrorPageActivity : AppCompatActivity() {
 
     private fun setupTransactionError(
         illustration: ImageView,
-        title: TextView,
-        message: TextView,
+        errorTitle: TextView,
+        errorMessage: TextView,
+        errorRecovery: TextView,
         primaryButton: Button,
         secondaryButton: Button
     ) {
         illustration.setImageResource(R.drawable.transaction_failed)
-        title.text = getString(R.string.error_transaction_title)
-        message.text = getString(R.string.error_transaction_message)
+        errorTitle.text = getString(R.string.error_transaction_title)
+        errorMessage.text = getString(R.string.error_transaction_message)
+        errorRecovery.text = getString(R.string.button_try_again)
         primaryButton.text = getString(R.string.button_try_again)
         secondaryButton.text = getString(R.string.button_contact_support)
 
@@ -124,14 +131,16 @@ class ErrorPageActivity : AppCompatActivity() {
 
     private fun setupSystemError(
         illustration: ImageView,
-        title: TextView,
-        message: TextView,
+        errorTitle: TextView,
+        errorMessage: TextView,
+        errorRecovery: TextView,
         primaryButton: Button,
         secondaryButton: Button
     ) {
         illustration.setImageResource(R.drawable.system_error)
-        title.text = getString(R.string.error_system_title)
-        message.text = getString(R.string.error_system_message)
+        errorTitle.text = getString(R.string.error_system_title)
+        errorMessage.text = getString(R.string.error_system_message)
+        errorRecovery.text = getString(R.string.button_go_home)
         primaryButton.text = getString(R.string.button_go_home)
         secondaryButton.text = getString(R.string.button_contact_support)
 

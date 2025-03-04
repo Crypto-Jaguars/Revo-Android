@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -15,15 +16,31 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.fideicomisoapproverring.transaction.TransactionMonitor
+import com.example.fideicomisoapproverring.transaction.TransactionErrorHandler
+import com.example.fideicomisoapproverring.transaction.TransactionRetryManager
+import com.example.fideicomisoapproverring.transaction.TransactionStateManager
+import com.example.fideicomisoapproverring.transaction.TransactionStatusView
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
 import org.stellar.sdk.*
+import org.stellar.sdk.responses.AccountResponse
 import org.stellar.sdk.responses.SubmitTransactionResponse
 import java.lang.Exception
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import com.example.fideicomisoapproverring.databinding.ActivityFindEscrowBinding
+import java.util.Random
+import org.stellar.sdk.Network
+import kotlinx.coroutines.delay
+import org.stellar.sdk.Server
 
 class FindEscrowActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityFindEscrowBinding
     private lateinit var loadingPanel: LinearLayout
     private lateinit var form: LinearLayout
 
@@ -37,35 +54,51 @@ class FindEscrowActivity : AppCompatActivity() {
     private lateinit var statusIcon: ImageView
     private lateinit var statusText: TextView
 
+    private lateinit var transactionMonitor: TransactionMonitor
+    private lateinit var transactionRetryManager: TransactionRetryManager
+    private lateinit var transactionStateManager: TransactionStateManager
+
+    private lateinit var transactionStatusView: TransactionStatusView
+
+    private lateinit var server: Server
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_find_escrow)
+        binding = ActivityFindEscrowBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Initialize components
-        loadingPanel = findViewById(R.id.loadingPanel)
-        form = findViewById(R.id.form)
-        engagementIdInput = findViewById(R.id.engagementIdInput)
-        contractIdInput = findViewById(R.id.contractIdInput)
-        enterButton = findViewById(R.id.enterButton)
-        balanceTextView = findViewById(R.id.balanceTextView)
-        logoutButton = findViewById(R.id.logoutButton)
+        // Initialize server
+        server = Server("https://horizon-testnet.stellar.org")
+        
+        transactionMonitor = TransactionMonitor()
+        transactionRetryManager = TransactionRetryManager()
+        transactionStateManager = TransactionStateManager(this)
 
-        statusBanner = findViewById(R.id.statusBanner)
-        statusIcon = findViewById(R.id.statusIcon)
-        statusText = findViewById(R.id.statusText)
-
-        val statusBanner: RelativeLayout = findViewById(R.id.statusBanner)
-        val statusIcon: ImageView = findViewById(R.id.statusIcon)
-        val statusText: TextView = findViewById(R.id.statusText)
-
-        // Obtener el estado de la conexión desde el intent
-        val connectionStatus = intent.getStringExtra("connectionStatus")
-
-        if (connectionStatus == ConnectionStatus.SUCCESS.name) {
-            showStatusBanner(ConnectionStatus.SUCCESS, statusBanner, statusIcon, statusText)
+        // Load any persisted transaction states
+        lifecycleScope.launch {
+            transactionStateManager.loadPersistedStates()
+            // Clean up old transactions
+            transactionStateManager.cleanupOldTransactions()
         }
 
-        // Manages the logic of the “Enter” button.
+        // Initialize components
+        loadingPanel = binding.loadingPanel
+        form = binding.form
+        engagementIdInput = binding.engagementIdInput
+        contractIdInput = binding.contractIdInput
+        enterButton = binding.enterButton
+        balanceTextView = binding.balanceTextView
+        logoutButton = binding.logoutButton
+
+        statusBanner = binding.statusBanner
+        statusIcon = binding.statusIcon
+        statusText = binding.statusText
+
+        transactionStatusView = binding.transactionStatusView
+
+        setupUI()
+
+        // Manages the logic of the "Enter" button.
         enterButton.setOnClickListener {
             val engagementId = engagementIdInput.text.toString()
             val contractId = contractIdInput.text.toString()
@@ -81,8 +114,8 @@ class FindEscrowActivity : AppCompatActivity() {
 
         setupSignTransactionButton()
 
-        // Manages the “Check Balance” button
-        val checkBalanceButton: Button = findViewById(R.id.checkBalanceButton)
+        // Manages the "Check Balance" button
+        val checkBalanceButton: Button = binding.checkBalanceButton
         checkBalanceButton.setOnClickListener {
             val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
             val publicKey = sharedPreferences.getString("publicKey", null)
@@ -94,7 +127,7 @@ class FindEscrowActivity : AppCompatActivity() {
             }
         }
 
-        // Manages the “Logout” button
+        // Manages the "Logout" button
         logoutButton.setOnClickListener {
             logout()
         }
@@ -209,108 +242,337 @@ class FindEscrowActivity : AppCompatActivity() {
     }
 
     private fun setupSignTransactionButton() {
-        val signTransactionButton: Button = findViewById(R.id.signTransactionButton)
-        signTransactionButton.setOnClickListener {
-
-            val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
-            val publicKey = sharedPreferences.getString("publicKey", null)
-
-            if (publicKey.isNullOrEmpty()) {
-                Toast.makeText(this, "Public key not found. Please connect your wallet.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        binding.signTransactionButton.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.IO) {
+                signAndSendTransaction()
             }
-
-
-            val privateKeyInput = EditText(this).apply {
-                hint = "Enter Private Key"
-            }
-
-            AlertDialog.Builder(this)
-                .setTitle("Sign Transaction")
-                .setMessage("Enter your private key to sign the transaction.")
-                .setView(privateKeyInput)
-                .setPositiveButton("Sign") { _, _ ->
-                    val privateKey = privateKeyInput.text.toString()
-                    if (privateKey.isNotEmpty()) {
-
-                        signAndSendTransaction(privateKey, publicKey)
-                    } else {
-                        Toast.makeText(this, "Private key is required to sign.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
         }
     }
 
-    private fun signAndSendTransaction(privateKey: String, publicKey: String) {
-        try {
+    private fun signAndSendTransaction() {
+        val transactionId = "TX_${System.currentTimeMillis()}_${Random().nextInt(10000)}"
+        Log.d("TransactionFlow", "Starting transaction $transactionId")
+        transactionMonitor.startTransaction(transactionId)
 
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
+                val publicKey = sharedPreferences.getString("publicKey", null)?.trim()
+
+                // Check if wallet is connected
+                if (publicKey == null) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@FindEscrowActivity, "Please connect your wallet first", Toast.LENGTH_SHORT).show()
+                    }
+                    return@launch
+                }
+
+                // Validate public key
+                if (!isValidStellarPublicKey(publicKey)) {
+                    throw IllegalArgumentException("Invalid public key format")
+                }
+
+                // Clean destination account
+                val destinationAccount = "GACLZTQDEX4UQVCXVWJDE3VN353OWQEBABW4R5RJDPGKESGEHE5Z7CNV".trim()
+                if (!isValidStellarPublicKey(destinationAccount)) {
+                    throw IllegalArgumentException("Invalid destination account format")
+                }
+
+                val amount = "10"
+
+                // Save initial transaction state
+                transactionStateManager.saveTransactionState(
+                    transactionId = transactionId,
+                    sourceAccount = publicKey,
+                    destinationAccount = destinationAccount,
+                    amount = amount
+                )
+
+                withContext(Dispatchers.Main) {
+                    showLoading(true)
+                }
+
+                try {
+                    Log.d("TransactionFlow", "Fetching source account from Stellar network")
+                    val sourceAccount = server.accounts().account(publicKey)
+
+                    Log.d("TransactionFlow", "Building transaction")
+                    transactionMonitor.onTransactionSigning(transactionId)
+
+                    val transaction = Transaction.Builder(sourceAccount, Network.TESTNET)
+                        .addOperation(
+                            PaymentOperation.Builder(
+                                destinationAccount,
+                                AssetTypeNative(),
+                                amount
+                            ).build()
+                        )
+                        .setTimeout(180)
+                        .setBaseFee(100)
+                        .build()
+
+                    Log.d("TransactionFlow", "Requesting wallet signature")
+                    // Instead of signing with private key, we'll request signature through wallet
+                    withContext(Dispatchers.Main) {
+                        transactionStatusView.showTransactionInProgress("Waiting for wallet signature...")
+                        Toast.makeText(
+                            this@FindEscrowActivity,
+                            "Wallet signature required. This feature will be implemented with the wallet SDK.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        showLoading(false)
+                    }
+                } catch (e: Exception) {
+                    val errorHandler = TransactionErrorHandler()
+                    val error = when (e) {
+                        is IOException -> errorHandler.detectError(e, transactionId)
+                        else -> errorHandler.detectError(e, transactionId)
+                    }
+                    withContext(Dispatchers.Main) {
+                        showLoading(false)
+                        transactionStatusView.showTransactionError(
+                            error,
+                            "Transaction failed: ${error.userMessage}",
+                            "Please try again or contact support if the problem persists."
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showLoading(false)
+                    Toast.makeText(this@FindEscrowActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    /**
+     * Performs a rollback operation for a failed transaction
+     */
+    private suspend fun performRollback(transactionId: String) {
+        try {
+            transactionStatusView.showRollbackInProgress()
+            
+            val state = transactionStateManager.getTransactionState(transactionId) ?: return
             val server = Server("https://horizon-testnet.stellar.org")
 
-
-            val sourceAccount = server.accounts().account(publicKey)
-
-
+            // Create a reverse transaction
+            val sourceAccount = server.accounts().account(state.destinationAccount)
             val transaction = Transaction.Builder(sourceAccount, Network.TESTNET)
                 .addOperation(
                     PaymentOperation.Builder(
-                        "GCDXSOPD5T5MCGCPPRV3CWMYLTTWASVZBF4HZBNES6PGK7YRATM27NB4",
+                        state.sourceAccount,
                         AssetTypeNative(),
-                        "1000"
+                        state.amount
                     ).build()
                 )
-                .setTimeout((System.currentTimeMillis() / 1000) + 300)
-                .setBaseFee(Transaction.MIN_BASE_FEE.toLong())
+                .setTimeout(180)
+                .setBaseFee(100)
                 .build()
 
-
-            val keyPair = KeyPair.fromSecretSeed(privateKey)
-            transaction.sign(keyPair)
-
-
-            val response: SubmitTransactionResponse = server.submitTransaction(transaction)
-
+            // Submit rollback transaction
+            val response = server.submitTransaction(transaction)
             if (response.isSuccess) {
-                runOnUiThread {
-                    Toast.makeText(this, "Transaction successful!", Toast.LENGTH_LONG).show()
+                transactionStateManager.completeRollback(transactionId, response)
+                Log.d("TransactionFlow", "Rollback successful for transaction $transactionId")
+                withContext(Dispatchers.Main) {
+                    transactionStatusView.showRollbackComplete()
                 }
             } else {
-                runOnUiThread {
-                    Toast.makeText(this, "Transaction failed: ${response.resultXdr}", Toast.LENGTH_LONG).show()
+                Log.e("TransactionFlow", "Rollback failed for transaction $transactionId")
+                withContext(Dispatchers.Main) {
+                    handleTransactionError(transactionId, "ROLLBACK_ERROR", "Failed to rollback transaction")
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-            runOnUiThread {
-                Toast.makeText(this, "Error signing transaction: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e("TransactionFlow", "Error during rollback: ${e.message}")
+            withContext(Dispatchers.Main) {
+                handleTransactionError(transactionId, "ROLLBACK_ERROR", e.message ?: "Unknown error during rollback")
             }
         }
     }
 
-    private fun showStatusBanner(status: ConnectionStatus, banner: RelativeLayout, icon: ImageView, text: TextView) {
-        when (status) {
-            ConnectionStatus.SUCCESS -> {
-                banner.setBackgroundResource(R.drawable.toast_success)
-                icon.setImageResource(R.drawable.check)
-                text.text = "Connection Successfully"
+    private fun isValidStellarPublicKey(publicKey: String): Boolean {
+        return try {
+            if (!publicKey.startsWith("G")) {
+                return false
             }
-            ConnectionStatus.ERROR -> {
-                banner.setBackgroundResource(R.drawable.toast_error)
-                icon.setImageResource(R.drawable.cancel)
-                text.text = "Error: Unable to connect."
+            if (publicKey.length != 56) {
+                return false
             }
-            ConnectionStatus.WARNING -> {
-                banner.setBackgroundResource(R.drawable.toast_warning)
-                icon.setImageResource(R.drawable.info)
-                text.text = "Action Required: Please check your input."
+            val base32Regex = "^[A-Z2-7]+$".toRegex()
+            if (!base32Regex.matches(publicKey.substring(1))) {
+                return false
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("TransactionFlow", "Error validating public key: ${e.message}")
+            false
+        }
+    }
+
+    private fun isValidStellarPrivateKey(privateKey: String): Boolean {
+        return try {
+            if (!privateKey.startsWith("S")) {
+                return false
+            }
+            if (privateKey.length != 56) {
+                return false
+            }
+            val base32Regex = "^[A-Z2-7]+$".toRegex()
+            if (!base32Regex.matches(privateKey.substring(1))) {
+                return false
+            }
+            // Try to create a KeyPair from the private key to validate it
+            KeyPair.fromSecretSeed(privateKey)
+            true
+        } catch (e: Exception) {
+            Log.e("TransactionFlow", "Error validating private key: ${e.message}")
+            false
+        }
+    }
+
+    private fun showLoading(show: Boolean) {
+        binding.loadingPanel.visibility = if (show) View.VISIBLE else View.GONE
+        binding.form.visibility = if (show) View.GONE else View.VISIBLE
+        if (show) {
+            binding.transactionStatusView.visibility = View.VISIBLE
+            binding.transactionStatusView.showTransactionInProgress()
+        } else {
+            binding.transactionStatusView.visibility = View.GONE
+        }
+    }
+
+    private fun handleTransactionError(transactionId: String, errorCode: String, errorMessage: String) {
+        val error = TransactionErrorHandler().handleWalletError(
+            Exception(errorMessage),
+            transactionId
+        )
+        
+        // Show error in TransactionStatusView
+        transactionStatusView.showTransactionError(
+            error = error,
+            friendlyMessage = error.userMessage,
+            steps = "1. Check your connection\n2. Verify your wallet details\n3. Try again"
+        )
+        
+        // Show a toast with the user-friendly message
+        Toast.makeText(this, error.userMessage, Toast.LENGTH_LONG).show()
+        
+        // Log the technical details
+        Log.e("TransactionFlow", """
+            Error details:
+            Transaction ID: $transactionId
+            State: ${transactionStateManager.getTransactionState(transactionId)?.status}
+            Error Type: ${error.type}
+            Error Message: ${error.message}
+            Recoverable: ${error.recoverable}
+        """.trimIndent())
+    }
+
+    private fun setupUI() {
+        // Get connection status from intent
+        val connectionStatus = intent.getStringExtra("connection_status")
+
+        if (connectionStatus == ConnectionStatus.SUCCESS.name) {
+            binding.statusBanner.apply {
+                visibility = View.VISIBLE
+            }
+            binding.statusIcon.setImageResource(R.drawable.check)
+            binding.statusText.text = "Connection Successful"
+        }
+
+        setupButtons()
+    }
+
+    private fun setupButtons() {
+        binding.enterButton.setOnClickListener {
+            val engagementId = binding.engagementIdInput.text.toString()
+            val contractId = binding.contractIdInput.text.toString()
+            
+            if (engagementId.isBlank() || contractId.isBlank()) {
+                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    showLoading(true)
+                    // Fetch engagement data would go here
+                    delay(1000) // Simulating API call
+                    showLoading(false)
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        showLoading(false)
+                        Toast.makeText(this@FindEscrowActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         }
 
-        banner.visibility = View.VISIBLE
-        Handler(Looper.getMainLooper()).postDelayed({
-            banner.visibility = View.GONE
-        }, 3000)
+        binding.logoutButton.setOnClickListener {
+            // Clear wallet connection
+            val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
+            sharedPreferences.edit().clear().apply()
+            
+            // Return to main activity
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
+
+        binding.checkBalanceButton.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    val sharedPreferences = getSharedPreferences("WalletPrefs", MODE_PRIVATE)
+                    val publicKey = sharedPreferences.getString("publicKey", null)
+                    
+                    if (publicKey == null) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@FindEscrowActivity, "Please connect your wallet first", Toast.LENGTH_SHORT).show()
+                        }
+                        return@launch
+                    }
+
+                    val balance = checkBalance(publicKey)
+                    withContext(Dispatchers.Main) {
+                        binding.balanceTextView.text = "Balance: $balance XLM"
+                        binding.balanceTextView.visibility = View.VISIBLE
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@FindEscrowActivity, "Error checking balance: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+
+        setupSignTransactionButton()
+    }
+
+    private suspend fun checkBalance(publicKey: String): String {
+        return withContext(Dispatchers.IO) {
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .url("https://horizon-testnet.stellar.org/accounts/$publicKey")
+                .build()
+
+            try {
+                val response = client.newCall(request).execute()
+                val json = JSONObject(response.body?.string() ?: throw Exception("Empty response"))
+                
+                val balances = json.getJSONArray("balances")
+                for (i in 0 until balances.length()) {
+                    val balance = balances.getJSONObject(i)
+                    if (balance.getString("asset_type") == "native") {
+                        return@withContext balance.getString("balance")
+                    }
+                }
+                "0"
+            } catch (e: Exception) {
+                Log.e("TransactionFlow", "Error checking balance: ${e.message}")
+                throw e
+            }
+        }
     }
 
 }
