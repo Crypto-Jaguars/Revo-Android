@@ -1,6 +1,8 @@
 package com.example.fideicomisoapproverring.theme.ui.theme
 
 import android.os.Build
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -9,6 +11,8 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
@@ -264,26 +268,75 @@ val unspecified_scheme =
 
 @Composable
 fun RingCoreTheme(
+    themeManager: ThemeManager? = null,
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
-    val colorScheme =
-        when {
-            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                val context = LocalContext.current
-                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            }
-
-            darkTheme -> darkScheme
-            else -> lightScheme
+    val context = LocalContext.current
+    
+    val followSystem = themeManager?.followSystem?.collectAsState(initial = true)?.value ?: true
+    val useDynamicColors = themeManager?.useDynamicColors?.collectAsState(initial = true)?.value ?: dynamicColor
+    val isDarkMode = themeManager?.isDarkMode?.collectAsState(initial = darkTheme)?.value ?: darkTheme
+    
+    val effectiveDarkTheme = if (followSystem) darkTheme else isDarkMode
+    
+    val colorScheme = when {
+        useDynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            if (effectiveDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+        effectiveDarkTheme -> darkScheme
+        else -> lightScheme
+    }
+
+    // Animate color transitions
+    val animatedColorScheme = colorScheme.toAnimatedColorScheme()
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = animatedColorScheme,
         typography = RingCoreTypography,
         shapes = shape,
-        content = content,
+        content = content
+    )
+}
+
+@Composable
+private fun androidx.compose.material3.ColorScheme.toAnimatedColorScheme(): androidx.compose.material3.ColorScheme {
+    return androidx.compose.material3.ColorScheme(
+        primary = animateColorAsState(targetValue = primary, animationSpec = spring()).value,
+        onPrimary = animateColorAsState(targetValue = onPrimary, animationSpec = spring()).value,
+        primaryContainer = animateColorAsState(targetValue = primaryContainer, animationSpec = spring()).value,
+        onPrimaryContainer = animateColorAsState(targetValue = onPrimaryContainer, animationSpec = spring()).value,
+        secondary = animateColorAsState(targetValue = secondary, animationSpec = spring()).value,
+        onSecondary = animateColorAsState(targetValue = onSecondary, animationSpec = spring()).value,
+        secondaryContainer = animateColorAsState(targetValue = secondaryContainer, animationSpec = spring()).value,
+        onSecondaryContainer = animateColorAsState(targetValue = onSecondaryContainer, animationSpec = spring()).value,
+        tertiary = animateColorAsState(targetValue = tertiary, animationSpec = spring()).value,
+        onTertiary = animateColorAsState(targetValue = onTertiary, animationSpec = spring()).value,
+        tertiaryContainer = animateColorAsState(targetValue = tertiaryContainer, animationSpec = spring()).value,
+        onTertiaryContainer = animateColorAsState(targetValue = onTertiaryContainer, animationSpec = spring()).value,
+        error = animateColorAsState(targetValue = error, animationSpec = spring()).value,
+        onError = animateColorAsState(targetValue = onError, animationSpec = spring()).value,
+        errorContainer = animateColorAsState(targetValue = errorContainer, animationSpec = spring()).value,
+        onErrorContainer = animateColorAsState(targetValue = onErrorContainer, animationSpec = spring()).value,
+        background = animateColorAsState(targetValue = background, animationSpec = spring()).value,
+        onBackground = animateColorAsState(targetValue = onBackground, animationSpec = spring()).value,
+        surface = animateColorAsState(targetValue = surface, animationSpec = spring()).value,
+        onSurface = animateColorAsState(targetValue = onSurface, animationSpec = spring()).value,
+        surfaceVariant = animateColorAsState(targetValue = surfaceVariant, animationSpec = spring()).value,
+        onSurfaceVariant = animateColorAsState(targetValue = onSurfaceVariant, animationSpec = spring()).value,
+        outline = animateColorAsState(targetValue = outline, animationSpec = spring()).value,
+        outlineVariant = animateColorAsState(targetValue = outlineVariant, animationSpec = spring()).value,
+        scrim = animateColorAsState(targetValue = scrim, animationSpec = spring()).value,
+        inverseSurface = animateColorAsState(targetValue = inverseSurface, animationSpec = spring()).value,
+        inverseOnSurface = animateColorAsState(targetValue = inverseOnSurface, animationSpec = spring()).value,
+        inversePrimary = animateColorAsState(targetValue = inversePrimary, animationSpec = spring()).value,
+        surfaceDim = animateColorAsState(targetValue = surfaceDim, animationSpec = spring()).value,
+        surfaceBright = animateColorAsState(targetValue = surfaceBright, animationSpec = spring()).value,
+        surfaceContainerLowest = animateColorAsState(targetValue = surfaceContainerLowest, animationSpec = spring()).value,
+        surfaceContainerLow = animateColorAsState(targetValue = surfaceContainerLow, animationSpec = spring()).value,
+        surfaceContainer = animateColorAsState(targetValue = surfaceContainer, animationSpec = spring()).value,
+        surfaceContainerHigh = animateColorAsState(targetValue = surfaceContainerHigh, animationSpec = spring()).value,
+        surfaceContainerHighest = animateColorAsState(targetValue = surfaceContainerHighest, animationSpec = spring()).value,
     )
 }
