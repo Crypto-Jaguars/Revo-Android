@@ -8,4 +8,6 @@ urlpatterns = [
     path('api/auth/', include('users.urls')), 
     path("api/auth/signup/", SignupView.as_view(), name="signup"),
     path("api/auth/login/", CustomLoginView.as_view(), name="custom_login"),
+    path('api/', include('inventory.urls')),
+    path('api/farmer/', include('farmers.urls')),
 ]
