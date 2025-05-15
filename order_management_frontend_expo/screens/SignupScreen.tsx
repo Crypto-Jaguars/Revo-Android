@@ -43,8 +43,14 @@ const SignupScreen: React.FC = () => {
                 alert(response.message || "Signup failed.");
             }
         } catch (error: any) {
-            alert(error.message || "Signup failed. Please try again.");
+            if (error.response && error.response.data) {
+                console.log("Signup error:", error.response.data);
+                alert(error.response.data.message || "Signup failed. Please try again.");
+            } else {
+                alert("Signup failed. Please try again.");
+            }
         }
+        
     };
 
     return (

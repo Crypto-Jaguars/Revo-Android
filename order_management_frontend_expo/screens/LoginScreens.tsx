@@ -1,6 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground } from "react-native";
+import { 
+    View, Text, TextInput, TouchableOpacity, StyleSheet, 
+    ImageBackground, Alert 
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen: React.FC = () => {
     const navigation = useNavigation();
@@ -12,30 +17,71 @@ const LoginScreen: React.FC = () => {
         uri: "https://plus.unsplash.com/premium_photo-1674624682232-c9ced5360a2e?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
     };
 
-    const handleLogin = () => {
-        if (!email || !password) {
-            alert("Please enter email and password");
+    const handleLogin = async () => {
+        if (!email || !password || !role) {
+            Alert.alert("Error", "Please enter email, password, and role.");
             return;
         }
-
-        alert("Login successful!");
-
-        if (role.toLowerCase() === "buyer") {
-            navigation.navigate("BuyerDashboard");  
-        } else if (role.toLowerCase() === "farmer") {
-            navigation.navigate("FarmerDashboard"); 
-        } else {
-            alert("Invalid role. Please enter Buyer or Farmer.");
+    
+        try {
+            const response = await axios.post("http://127.0.0.1:8000/api/auth/login/", {
+                email, 
+                password,
+                role
+            });
+    
+            if (response.data.success) {
+                const { token, user_role } = response.data;
+    
+                await AsyncStorage.setItem("token", token);
+                await AsyncStorage.setItem("role", user_role);
+    
+                Alert.alert("Success", "Login successful!");
+    
+                if (user_role.toLowerCase() === "buyer") {
+                    navigation.navigate("BuyerDashboard");  
+                } else if (user_role.toLowerCase() === "farmer") {
+                    navigation.navigate("FarmerDashboard"); 
+                } else {
+                    Alert.alert("Error", "Invalid role received. Please contact support.");
+                }
+            } else {
+                Alert.alert("Error", response.data.message || "Login failed.");
+            }
+        } catch (error: any) {
+            console.log("Login error:", error.response?.data || error.message);
+            Alert.alert("Login Failed", error.response?.data?.message || "Invalid credentials or server issue.");
         }
-    };
+    }; 
 
     return (
         <ImageBackground source={backgroundImage} style={styles.background} resizeMode="cover">
             <View style={styles.overlay}>
                 <Text style={styles.title}>Login</Text>
-                <TextInput placeholder="Email" style={styles.input} onChangeText={setEmail} placeholderTextColor="#ddd"/>
-                <TextInput placeholder="Password" secureTextEntry style={styles.input} onChangeText={setPassword} placeholderTextColor="#ddd"/>
-                <TextInput placeholder="Role (Buyer/Farmer)" style={styles.input} onChangeText={setRole} placeholderTextColor="#ddd"/>
+
+                <TextInput 
+                    placeholder="Email" 
+                    style={styles.input} 
+                    onChangeText={setEmail} 
+                    placeholderTextColor="#ddd"
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                />
+
+                <TextInput 
+                    placeholder="Password" 
+                    secureTextEntry 
+                    style={styles.input} 
+                    onChangeText={setPassword} 
+                    placeholderTextColor="#ddd"
+                />
+
+                <TextInput 
+                    placeholder="Role (Buyer/Farmer)" 
+                    style={styles.input} 
+                    onChangeText={setRole} 
+                    placeholderTextColor="#ddd"
+                />
 
                 <TouchableOpacity style={styles.button} onPress={handleLogin}>
                     <Text style={styles.buttonText}>Login</Text>
@@ -93,6 +139,7 @@ const styles = StyleSheet.create({
         color: "#00c3ff",
         textDecorationLine: "underline",
     },
+
 });
 
 export default LoginScreen;
